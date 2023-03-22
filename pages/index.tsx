@@ -3,10 +3,19 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { Dotting } from "dotting";
+import { useCallback } from "react";
+import axios from "axios";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const testOpenAi = useCallback(async () => {
+    const response = await axios.post("api/openai/dalle", {
+      queryPrompt: "Hello world",
+    });
+    console.log(response);
+  }, []);
+
   return (
     <>
       <Head>
@@ -17,6 +26,7 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <Dotting width={300} height={300} />
+        <button onClick={testOpenAi}>Test</button>
       </main>
     </>
   );
