@@ -15,7 +15,9 @@ export default async function handler(
   if (req.method === "POST") {
     const { queryPrompt } = req.body;
     const response = await openai.createImage({
+      // prompt for the image
       prompt: queryPrompt,
+      // number of images to return
       n: 1,
       // 256x256 is the smallest size
       size: "256x256",
