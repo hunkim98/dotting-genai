@@ -14,6 +14,10 @@ export default function Home() {
       queryPrompt: "Hello world",
     });
     console.log(response);
+    const { data } = response;
+    console.log(data);
+    const imgArray: Array<{ url: string }> = data.data;
+    imgArray.forEach((element) => console.log(element.url));
   }, []);
 
   return (
