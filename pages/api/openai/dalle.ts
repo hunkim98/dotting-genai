@@ -1,4 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import axios from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi } from "openai";
 
@@ -22,7 +23,18 @@ export default async function handler(
       // 256x256 is the smallest size
       size: "256x256",
     });
-    res.status(200).json(response.data);
+    const imageUrl = response.data.data[0].url;
+    let blob = null;
+    if (imageUrl) {
+      const response = await axios.get(imageUrl, {
+        responseType: "arraybuffer",
+      });
+      // send buffer instead since image url is not working due to CORS error
+      const buffer = Buffer.from(response.data, "utf-8");
+      console.log("blob", buffer);
+      res.status(200).json({ ...response.data, buffer });
+    }
+    // res.status(200).json({ ...response.data, blob: blob?.arrayBuffer });
   } else {
     res.status(400).json({ error: "Invalid request method" });
   }

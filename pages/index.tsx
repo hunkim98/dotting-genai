@@ -2,23 +2,96 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { Dotting } from "dotting";
-import { useCallback } from "react";
+import {
+  CanvasHoverPixelChangeHandler,
+  Dotting,
+  DottingRef,
+  useHandlers,
+} from "dotting";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { pixelateImage } from "@/utils/image/pixelateImage";
+import { getDataUri } from "@/utils/image/getDataUri";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const testOpenAi = useCallback(async () => {
-    const response = await axios.post("api/openai/dalle", {
-      queryPrompt: "Hello world",
+  const ref = useRef<DottingRef>(null);
+  const {
+    addHoverPixelChangeListener,
+    removeHoverPixelChangeListener,
+    addCanvasElementEventListener,
+    removeCanvasElementEventListener,
+  } = useHandlers(ref);
+  const [isReceiving, setIsReceiving] = useState(false);
+
+  const hoveredPixel = useRef<{
+    rowIndex: number;
+    columnIndex: number;
+  } | null>(null);
+
+  const imageUrlRef = useRef<string | null>(null);
+
+  const handleHoverPixelChangeHandler: CanvasHoverPixelChangeHandler = (
+    indices
+  ) => {
+    if (indices === null) {
+      return;
+    }
+    hoveredPixel.current = {
+      rowIndex: indices.rowIndex,
+      columnIndex: indices.columnIndex,
+    };
+  };
+
+  useEffect(() => {
+    addCanvasElementEventListener("mousedown", (event) => {
+      if (hoveredPixel.current === null) {
+        console.log("no hovered pixel");
+      }
+      console.log("mousedown", event);
     });
-    console.log(response);
-    const { data } = response;
-    console.log(data);
-    const imgArray: Array<{ url: string }> = data.data;
-    imgArray.forEach((element) => console.log(element.url));
-  }, []);
+    return () => {
+      removeCanvasElementEventListener("mousedown", (event) => {
+        console.log("mousedown", event);
+      });
+    };
+  }, [
+    addCanvasElementEventListener,
+    removeCanvasElementEventListener,
+    hoveredPixel,
+  ]);
+
+  useEffect(() => {
+    addHoverPixelChangeListener(handleHoverPixelChangeHandler);
+    return () => {
+      removeHoverPixelChangeListener(handleHoverPixelChangeHandler);
+    };
+  }, [addHoverPixelChangeListener, removeHoverPixelChangeListener]);
+
+  const callImage = useCallback(async () => {
+    setIsReceiving(true);
+    try {
+      const response = await axios.post("api/openai/dalle", {
+        queryPrompt: "Hello world",
+      });
+      console.log(response);
+      const imgArray: Array<{ url: string }> = response.data.data;
+      const buffer = response.data.buffer;
+      console.log(buffer);
+      const imageUrl = imgArray[0].url;
+      imageUrlRef.current = imageUrl;
+      const dataUri = getDataUri(imageUrl);
+      console.log(dataUri);
+
+      // const { imgUrl, data } = await pixelateImage(imageUrlRef.current, 10);
+      // console.log(data);
+      setIsReceiving(false);
+    } catch (error) {
+      console.error(error);
+      setIsReceiving(false);
+    }
+  }, [imageUrlRef]);
 
   return (
     <>
@@ -29,8 +102,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <Dotting width={300} height={300} />
-        <button onClick={testOpenAi}>Test</button>
+        {isReceiving && <div>Receiving</div>}
+        <Dotting ref={ref} width={"100%"} height={500} />
+        {/* <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-5LdEtBGsishA9Li1KToYT2JD/user-1A4dVu9RP1StfUY5mDpbxswd/img-IPLUJ58r11qZv2ELv6ofKPUd.png?st=2023-03-23T16%3A49%3A17Z&se=2023-03-23T18%3A49%3A17Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-23T17%3A29%3A13Z&ske=2023-03-24T17%3A29%3A13Z&sks=b&skv=2021-08-06&sig=zRHUrf1zb3PAYYIXNsD6CJJ9t%2BhVgkS6Px5wF/iUg4E%3D" /> */}
+        <button onClick={callImage}>Test</button>
       </main>
     </>
   );
