@@ -73,7 +73,7 @@ export default function Home() {
     setIsReceiving(true);
     try {
       const response = await axios.post("api/openai/dalle", {
-        queryPrompt: "Hello world",
+        queryPrompt: "luigi with no background",
       });
       const buffer = response.data.buffer;
 
@@ -81,10 +81,11 @@ export default function Home() {
       console.log(view, "uintarray");
       const blob = new Blob([view], { type: "image/png" });
       const url = URL.createObjectURL(blob);
-      const { imgUrl, data } = await pixelateImage(url, 10);
-      // console.log(data);
-      console.log(imgUrl);
       setIsReceiving(false);
+      const { imgUrl, data } = await pixelateImage(url, 10);
+
+      console.log(imgUrl);
+      console.log("data", data);
     } catch (error) {
       console.error(error);
       setIsReceiving(false);
