@@ -7,7 +7,6 @@ import { DottingData } from "dotting";
  */
 export async function pixelateImage(
   imageUrl: string,
-  buffer: Buffer,
   pixelationFactor: number
 ): Promise<{ imgUrl: string; data: DottingData }> {
   const canvas = document.createElement("canvas");

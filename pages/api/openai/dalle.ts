@@ -31,8 +31,11 @@ export default async function handler(
       });
       // send buffer instead since image url is not working due to CORS error
       const buffer = Buffer.from(response.data, "utf-8");
-      console.log("blob", buffer);
-      res.status(200).json({ ...response.data, buffer });
+      // res.send(buffer)
+      // res.status(200).b
+      res.status(200).json({
+        buffer: buffer.toJSON().data,
+      });
     }
     // res.status(200).json({ ...response.data, blob: blob?.arrayBuffer });
   } else {

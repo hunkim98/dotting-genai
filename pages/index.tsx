@@ -75,17 +75,15 @@ export default function Home() {
       const response = await axios.post("api/openai/dalle", {
         queryPrompt: "Hello world",
       });
-      console.log(response);
-      const imgArray: Array<{ url: string }> = response.data.data;
       const buffer = response.data.buffer;
-      console.log(buffer);
-      const imageUrl = imgArray[0].url;
-      imageUrlRef.current = imageUrl;
-      const dataUri = getDataUri(imageUrl);
-      console.log(dataUri);
 
-      // const { imgUrl, data } = await pixelateImage(imageUrlRef.current, 10);
+      const view = new Uint8Array(buffer);
+      console.log(view, "uintarray");
+      const blob = new Blob([view], { type: "image/png" });
+      const url = URL.createObjectURL(blob);
+      const { imgUrl, data } = await pixelateImage(url, 10);
       // console.log(data);
+      console.log(imgUrl);
       setIsReceiving(false);
     } catch (error) {
       console.error(error);
