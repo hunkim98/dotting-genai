@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import { getDataUri } from "@/utils/image/getDataUri";
+import RightBar from "@/components/RightBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -75,17 +76,18 @@ export default function Home() {
       const response = await axios.post("api/openai/dalle", {
         queryPrompt: "luigi with no background",
       });
-      const buffer = response.data.buffer;
-
-      const view = new Uint8Array(buffer);
-      console.log(view, "uintarray");
-      const blob = new Blob([view], { type: "image/png" });
-      const url = URL.createObjectURL(blob);
+      const buffers = response.data.buffers;
+      for (const buffer of buffers) {
+        const view = new Uint8Array(buffer);
+        console.log(view, "uintarray");
+        const blob = new Blob([view], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+        const { imgUrl, data } = await pixelateImage(url, 10);
+        // for now we can save imgUrl in localStorage
+        console.log(imgUrl);
+        console.log("data", data);
+      }
       setIsReceiving(false);
-      const { imgUrl, data } = await pixelateImage(url, 10);
-
-      console.log(imgUrl);
-      console.log("data", data);
     } catch (error) {
       console.error(error);
       setIsReceiving(false);
@@ -100,11 +102,14 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
+      <main style={{ display: "flex", flexDirection: "column", width: "100%" }}>
         {isReceiving && <div>Receiving</div>}
-        <Dotting ref={ref} width={"100%"} height={500} />
+        <div style={{ display: "flex" }}>
+          <Dotting ref={ref} width={"100%"} height={500} />
+          <RightBar />
+        </div>
         {/* <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-5LdEtBGsishA9Li1KToYT2JD/user-1A4dVu9RP1StfUY5mDpbxswd/img-IPLUJ58r11qZv2ELv6ofKPUd.png?st=2023-03-23T16%3A49%3A17Z&se=2023-03-23T18%3A49%3A17Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-23T17%3A29%3A13Z&ske=2023-03-24T17%3A29%3A13Z&sks=b&skv=2021-08-06&sig=zRHUrf1zb3PAYYIXNsD6CJJ9t%2BhVgkS6Px5wF/iUg4E%3D" /> */}
-        <button onClick={callImage}>Test</button>
+        <button onClick={callImage}>Bring Sample image</button>
       </main>
     </>
   );

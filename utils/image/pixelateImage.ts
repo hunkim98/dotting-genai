@@ -56,7 +56,7 @@ export async function pixelateImage(
             columnIndex = 0;
           }
         }
-        console.log(canvas.toDataURL(), pixelData);
+        resolve({ imgUrl: canvas.toDataURL(), data: pixelData });
       };
       imageObject.onerror = (error) => {
         console.log(error, "This is from pixelateImage.ts");
