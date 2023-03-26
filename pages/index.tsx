@@ -74,7 +74,7 @@ export default function Home() {
     setIsReceiving(true);
     try {
       const response = await axios.post("api/openai/dalle", {
-        queryPrompt: "luigi with no background",
+        queryPrompt: "dog cartoon style with white background",
       });
       const buffers = response.data.buffers;
       for (const buffer of buffers) {
@@ -92,7 +92,7 @@ export default function Home() {
       console.error(error);
       setIsReceiving(false);
     }
-  }, [imageUrlRef]);
+  }, [setIsReceiving]);
 
   return (
     <>
