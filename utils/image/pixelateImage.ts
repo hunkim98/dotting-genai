@@ -16,6 +16,7 @@ export async function pixelateImage(
       const imageObject = new Image();
       imageObject.crossOrigin = "anonymous";
       //   imageObject.crossOrigin = "Anonymous";/
+      // imageObject.crossOrigin = "use-credentials";
       imageObject.src = imageUrl;
       console.log("imageObject", imageObject);
       imageObject.onload = () => {
