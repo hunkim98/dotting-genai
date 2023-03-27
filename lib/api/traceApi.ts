@@ -1,8 +1,9 @@
-import { PixelModifyItem } from "@/../dotting/build/src";
+import { PixelModifyItem } from "dotting";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { HYDRATE } from "next-redux-wrapper";
 
 // https://redux-toolkit.js.org/rtk-query/usage/mutations
+// https://github.com/phryneas/ssr-experiments/tree/main/nextjs-blog
 export const traceApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://pokeapi.co/api/v2/",

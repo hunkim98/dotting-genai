@@ -1,4 +1,4 @@
-import { DottingData } from "@/../dotting/build/src";
+import { DottingData } from "dotting";
 import React, { useMemo } from "react";
 import { createContext } from "react";
 

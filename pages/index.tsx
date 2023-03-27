@@ -5,6 +5,7 @@ import styles from "@/styles/Home.module.css";
 import {
   CanvasHoverPixelChangeHandler,
   Dotting,
+  DottingData,
   DottingRef,
   useHandlers,
 } from "dotting";
@@ -13,18 +14,22 @@ import axios from "axios";
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import { getDataUri } from "@/utils/image/getDataUri";
 import RightBar from "@/components/RightBar";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { setIsReceiving, setPixelatedData } from "@/lib/modules/genAi";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
+  const isReceiving = useAppSelector((state) => state.genAi.isReceiving);
+  const [prompt, setPrompt] = useState<string>("");
+  const dispatch = useAppDispatch();
   const {
     addHoverPixelChangeListener,
     removeHoverPixelChangeListener,
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
   } = useHandlers(ref);
-  const [isReceiving, setIsReceiving] = useState(false);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -71,28 +76,38 @@ export default function Home() {
   }, [addHoverPixelChangeListener, removeHoverPixelChangeListener]);
 
   const callImage = useCallback(async () => {
-    setIsReceiving(true);
+    dispatch(setIsReceiving(true));
     try {
       const response = await axios.post("api/openai/dalle", {
-        queryPrompt: "dog cartoon style with white background",
+        queryPrompt: prompt,
       });
       const buffers = response.data.buffers;
+      const temp: Array<{ imgUrl: string; data: DottingData }> = [];
       for (const buffer of buffers) {
         const view = new Uint8Array(buffer);
-        console.log(view, "uintarray");
         const blob = new Blob([view], { type: "image/png" });
         const url = URL.createObjectURL(blob);
         const { imgUrl, data } = await pixelateImage(url, 10);
+        temp.push({ imgUrl, data });
         // for now we can save imgUrl in localStorage
         console.log(imgUrl);
-        console.log("data", data);
       }
-      setIsReceiving(false);
+      dispatch(setPixelatedData(temp));
+      dispatch(setIsReceiving(false));
     } catch (error) {
       console.error(error);
-      setIsReceiving(false);
+      alert("Error has happened while generating image data");
+      dispatch(setIsReceiving(false));
     }
-  }, [setIsReceiving]);
+  }, [dispatch, prompt]);
+
+  const enhancePrompt = useCallback(async () => {
+    if (!prompt) {
+      alert("Please enter a prompt");
+      return;
+    }
+    setPrompt("cartoon-style " + prompt + " with white background");
+  }, [prompt, setPrompt]);
 
   return (
     <>
@@ -108,8 +123,36 @@ export default function Home() {
           <Dotting ref={ref} width={"100%"} height={500} />
           <RightBar />
         </div>
-        {/* <img src="https://oaidalleapiprodscus.blob.core.windows.net/private/org-5LdEtBGsishA9Li1KToYT2JD/user-1A4dVu9RP1StfUY5mDpbxswd/img-IPLUJ58r11qZv2ELv6ofKPUd.png?st=2023-03-23T16%3A49%3A17Z&se=2023-03-23T18%3A49%3A17Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-23T17%3A29%3A13Z&ske=2023-03-24T17%3A29%3A13Z&sks=b&skv=2021-08-06&sig=zRHUrf1zb3PAYYIXNsD6CJJ9t%2BhVgkS6Px5wF/iUg4E%3D" /> */}
-        <button onClick={callImage}>Bring Sample image</button>
+        <div
+          style={{
+            alignSelf: "center",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <input
+            value={prompt}
+            style={{ fontSize: 20, margin: 5, padding: 10 }}
+            onChange={(e) => {
+              setPrompt(e.target.value);
+            }}
+          />
+          <button
+            style={{
+              padding: 10,
+              margin: 5,
+            }}
+            onClick={enhancePrompt}
+          >
+            Enhance prompt
+          </button>
+          <button
+            style={{ padding: 10, margin: 5, backgroundColor: "indigo" }}
+            onClick={callImage}
+          >
+            Generate images
+          </button>
+        </div>
       </main>
     </>
   );
