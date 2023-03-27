@@ -602,8 +602,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dotting@../dotting:
+dotting@^1.0.7:
   version "1.0.7"
+  resolved "https://registry.yarnpkg.com/dotting/-/dotting-1.0.7.tgz#325416e0c1d94f08bb9d966625c792c192ddd45e"
+  integrity sha512-eauaQkLk3o++uKDMoWSzDgUrbDEaMaP7MT43KCLx9/McxNw2qqapIDIc4Sz2eTTfVN+UJ7M3/aoc7Vj/hMTFtQ==
 
 emoji-regex@^9.2.2:
   version "9.2.2"
