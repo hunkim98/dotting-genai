@@ -1,4 +1,4 @@
-import { DottingData } from "dotting";
+import { DottingData, PixelModifyItem } from "dotting";
 /**
  * Asynchronously pixelates an image
  * @param imageUrl
@@ -18,7 +18,6 @@ export async function pixelateImage(
       //   imageObject.crossOrigin = "Anonymous";/
       // imageObject.crossOrigin = "use-credentials";
       imageObject.src = imageUrl;
-      console.log("imageObject", imageObject);
       imageObject.onload = () => {
         const originalWidth = imageObject.width;
         const originalHeight = imageObject.height;

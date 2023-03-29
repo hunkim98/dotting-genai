@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { DottingData } from "dotting";
+import { DottingData, PixelData } from "dotting";
 
 export type GenAiState = {
   isReceiving: boolean;
-  pixelatedData: Array<{ imgUrl: string; data: DottingData }>;
+  generatedImgUrls: Array<string>;
 };
 
 export const GenAiInitialState: GenAiState = {
   isReceiving: false,
-  pixelatedData: [],
+  generatedImgUrls: [],
 };
 
 export const genAiModule = createSlice({
@@ -18,10 +18,10 @@ export const genAiModule = createSlice({
     setIsReceiving: (state, action) => {
       state.isReceiving = action.payload;
     },
-    setPixelatedData: (state, action) => {
-      state.pixelatedData = action.payload;
+    setGeneratedImgUrls: (state, action) => {
+      state.generatedImgUrls = action.payload;
     },
   },
 });
 
-export const { setIsReceiving, setPixelatedData } = genAiModule.actions;
+export const { setIsReceiving, setGeneratedImgUrls } = genAiModule.actions;
