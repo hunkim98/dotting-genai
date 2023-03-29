@@ -21,8 +21,6 @@ import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 import { Button, Center, Input } from "@chakra-ui/react";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export default function Home() {
   const ref = useRef<DottingRef>(null);
   const { selectedDottingData, setSelectedDottingData } =
@@ -36,20 +34,12 @@ export default function Home() {
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
   } = useHandlers(ref);
-  const { setIndicatorPixels } = useDotting(ref);
+  const { setIndicatorPixels, colorPixels } = useDotting(ref);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
     columnIndex: number;
   } | null>(null);
-
-  const imageUrlRef = useRef<string | null>(null);
-
-  const handleSth = useCallback(() => {
-    if (hoveredPixel.current === null) {
-      return;
-    }
-  }, []);
 
   const handleHoverPixelChangeHandler =
     useCallback<CanvasHoverPixelChangeHandler>(
@@ -57,6 +47,7 @@ export default function Home() {
         if (indices === null) {
           return;
         }
+        console.log("hi");
         const { rowIndex, columnIndex } = indices;
         hoveredPixel.current = {
           rowIndex,
@@ -66,14 +57,19 @@ export default function Home() {
           return;
         }
         const tempIndicators: Array<PixelModifyItem> = [];
-        selectedDottingData.forEach((dottingData, rowIndex) => {
-          dottingData.forEach((dottingData, columnIndex) => {
+        const selectedWidth = selectedDottingData.size;
+        const selectedHeight = selectedDottingData.entries().next().value[1]
+          .size as number;
+        const widthOffset = Math.floor(selectedWidth / 2);
+        const heightOffset = Math.floor(selectedHeight / 2);
+        selectedDottingData.forEach((dottingData, dataRowIndex) => {
+          dottingData.forEach((dottingData, dataColumnIndex) => {
             if (dottingData === null) {
               return;
             }
             tempIndicators.push({
-              rowIndex,
-              columnIndex,
+              rowIndex: dataRowIndex + rowIndex - widthOffset,
+              columnIndex: dataColumnIndex + columnIndex - heightOffset,
               color: dottingData.color,
             });
           });
@@ -85,29 +81,56 @@ export default function Home() {
     );
 
   useEffect(() => {
-    window.addEventListener("keydown", (event) => {
+    const escapeKeyEvent = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setSelectedDottingData(null);
+        setIndicatorPixels([]);
       }
-    });
-  }, [setSelectedDottingData]);
+    };
+    window.addEventListener("keydown", escapeKeyEvent);
+    return () => {
+      window.removeEventListener("keydown", escapeKeyEvent);
+    };
+  }, [setSelectedDottingData, setIndicatorPixels]);
 
   useEffect(() => {
-    addCanvasElementEventListener("mousedown", (event) => {
-      if (hoveredPixel.current === null) {
-        console.log("no hovered pixel");
+    const colorIndicators = (event: Event) => {
+      if (!selectedDottingData) {
+        return;
       }
-      console.log("mousedown", event);
-    });
+      if (hoveredPixel.current !== null) {
+        const tempIndicators: Array<PixelModifyItem> = [];
+        const selectedWidth = selectedDottingData.size;
+        const selectedHeight = selectedDottingData.entries().next().value[1]
+          .size as number;
+        const widthOffset = Math.floor(selectedWidth / 2);
+        const heightOffset = Math.floor(selectedHeight / 2);
+        const { rowIndex, columnIndex } = hoveredPixel.current;
+        selectedDottingData.forEach((dottingData, dataRowIndex) => {
+          dottingData.forEach((dottingData, dataColumnIndex) => {
+            if (dottingData === null) {
+              return;
+            }
+            tempIndicators.push({
+              rowIndex: dataRowIndex + rowIndex - widthOffset,
+              columnIndex: dataColumnIndex + columnIndex - heightOffset,
+              color: dottingData.color,
+            });
+          });
+        });
+        colorPixels(tempIndicators);
+      }
+    };
+    addCanvasElementEventListener("mousedown", colorIndicators);
     return () => {
-      removeCanvasElementEventListener("mousedown", (event) => {
-        console.log("mousedown", event);
-      });
+      removeCanvasElementEventListener("mousedown", colorIndicators);
     };
   }, [
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
     hoveredPixel,
+    colorPixels,
+    selectedDottingData,
   ]);
 
   useEffect(() => {
@@ -163,7 +186,24 @@ export default function Home() {
       <main style={{ display: "flex", flexDirection: "column", width: "100%" }}>
         {isReceiving && <div>Receiving</div>}
         <div style={{ display: "flex" }}>
-          <Dotting ref={ref} width={"100%"} height={500} />
+          <Dotting
+            ref={ref}
+            width={"100%"}
+            height={500}
+            initData={Array(30)
+              .fill("")
+              .map((out, outIndex) => {
+                return Array(30)
+                  .fill("")
+                  .map((inner, innerIndex) => {
+                    return {
+                      color: "",
+                      rowIndex: outIndex,
+                      columnIndex: innerIndex,
+                    };
+                  });
+              })}
+          />
           <RightBar />
         </div>
         <Center
