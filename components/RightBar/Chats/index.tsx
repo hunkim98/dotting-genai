@@ -52,7 +52,7 @@ const Chats = ({
           return (
             <Flex key={index} w="100%">
               <Avatar
-                // name="Computer"
+                name="D"
                 // src="https://avataaars.io/?avatarStyle=Transparent&topType=LongHairStraight&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=Default&mouthType=Default&skinColor=Light"
                 bg="#309695"
                 size="sm"
