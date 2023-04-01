@@ -189,7 +189,7 @@ export default function Home() {
           <Dotting
             ref={ref}
             width={"100%"}
-            height={500}
+            height={"100vh"}
             initData={Array(30)
               .fill("")
               .map((out, outIndex) => {
@@ -206,7 +206,7 @@ export default function Home() {
           />
           <RightBar />
         </div>
-        <Center
+        {/* <Center
           style={{
             alignSelf: "center",
             display: "flex",
@@ -232,7 +232,7 @@ export default function Home() {
           <Button colorScheme="teal" style={{ margin: 5 }} onClick={callImage}>
             Generate images
           </Button>
-        </Center>
+        </Center> */}
       </main>
     </>
   );
