@@ -5,28 +5,23 @@ import { createContext } from "react";
 //https://velog.io/@velopert/react-context-tutorial
 
 interface GenAiDataType {
-  isReceiving: boolean;
-  setIsReceiving: (isReceiving: boolean) => void;
-  data: Array<{ url: string; data: DottingData }>;
-  setData: (data: Array<{ url: string; data: DottingData }>) => void;
+  selectedDottingData: DottingData | null;
+  setSelectedDottingData: React.Dispatch<
+    React.SetStateAction<DottingData | null>
+  >;
 }
-const GenAiDataContext = createContext({} as GenAiDataType);
+export const GenAiDataContext = createContext({} as GenAiDataType);
 
 function GenAiDataContextProvier({ children }: { children: React.ReactNode }) {
-  const [isReceiving, setIsReceiving] = React.useState(false);
-
-  const [data, setData] = React.useState<
-    Array<{ url: string; data: DottingData }>
-  >([]);
+  const [selectedDottingData, setSelectedDottingData] =
+    React.useState<DottingData | null>(null);
 
   const value = useMemo(
     () => ({
-      isReceiving,
-      setIsReceiving,
-      data,
-      setData,
+      selectedDottingData,
+      setSelectedDottingData,
     }),
-    [isReceiving, setIsReceiving, data, setData]
+    [selectedDottingData, setSelectedDottingData]
   );
   return (
     <GenAiDataContext.Provider value={value}>

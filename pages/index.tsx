@@ -7,20 +7,24 @@ import {
   Dotting,
   DottingData,
   DottingRef,
+  PixelModifyItem,
+  useDotting,
   useHandlers,
 } from "dotting";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import { getDataUri } from "@/utils/image/getDataUri";
 import RightBar from "@/components/RightBar";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { setIsReceiving, setPixelatedData } from "@/lib/modules/genAi";
-
-const inter = Inter({ subsets: ["latin"] });
+import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
+import { Button, Center, Input } from "@chakra-ui/react";
+import { GenAiDataContext } from "@/context/GenAiDataContext";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
+  const { selectedDottingData, setSelectedDottingData } =
+    useContext(GenAiDataContext);
   const isReceiving = useAppSelector((state) => state.genAi.isReceiving);
   const [prompt, setPrompt] = useState<string>("");
   const dispatch = useAppDispatch();
@@ -30,42 +34,103 @@ export default function Home() {
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
   } = useHandlers(ref);
+  const { setIndicatorPixels, colorPixels } = useDotting(ref);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
     columnIndex: number;
   } | null>(null);
 
-  const imageUrlRef = useRef<string | null>(null);
+  const handleHoverPixelChangeHandler =
+    useCallback<CanvasHoverPixelChangeHandler>(
+      (indices) => {
+        if (indices === null) {
+          return;
+        }
+        console.log("hi");
+        const { rowIndex, columnIndex } = indices;
+        hoveredPixel.current = {
+          rowIndex,
+          columnIndex,
+        };
+        if (selectedDottingData === null) {
+          return;
+        }
+        const tempIndicators: Array<PixelModifyItem> = [];
+        const selectedWidth = selectedDottingData.size;
+        const selectedHeight = selectedDottingData.entries().next().value[1]
+          .size as number;
+        const widthOffset = Math.floor(selectedWidth / 2);
+        const heightOffset = Math.floor(selectedHeight / 2);
+        selectedDottingData.forEach((dottingData, dataRowIndex) => {
+          dottingData.forEach((dottingData, dataColumnIndex) => {
+            if (dottingData === null) {
+              return;
+            }
+            tempIndicators.push({
+              rowIndex: dataRowIndex + rowIndex - widthOffset,
+              columnIndex: dataColumnIndex + columnIndex - heightOffset,
+              color: dottingData.color,
+            });
+          });
+        });
+        setIndicatorPixels(tempIndicators);
+      },
 
-  const handleHoverPixelChangeHandler: CanvasHoverPixelChangeHandler = (
-    indices
-  ) => {
-    if (indices === null) {
-      return;
-    }
-    hoveredPixel.current = {
-      rowIndex: indices.rowIndex,
-      columnIndex: indices.columnIndex,
-    };
-  };
+      [hoveredPixel, setIndicatorPixels, selectedDottingData]
+    );
 
   useEffect(() => {
-    addCanvasElementEventListener("mousedown", (event) => {
-      if (hoveredPixel.current === null) {
-        console.log("no hovered pixel");
+    const escapeKeyEvent = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedDottingData(null);
+        setIndicatorPixels([]);
       }
-      console.log("mousedown", event);
-    });
+    };
+    window.addEventListener("keydown", escapeKeyEvent);
     return () => {
-      removeCanvasElementEventListener("mousedown", (event) => {
-        console.log("mousedown", event);
-      });
+      window.removeEventListener("keydown", escapeKeyEvent);
+    };
+  }, [setSelectedDottingData, setIndicatorPixels]);
+
+  useEffect(() => {
+    const colorIndicators = (event: Event) => {
+      if (!selectedDottingData) {
+        return;
+      }
+      if (hoveredPixel.current !== null) {
+        const tempIndicators: Array<PixelModifyItem> = [];
+        const selectedWidth = selectedDottingData.size;
+        const selectedHeight = selectedDottingData.entries().next().value[1]
+          .size as number;
+        const widthOffset = Math.floor(selectedWidth / 2);
+        const heightOffset = Math.floor(selectedHeight / 2);
+        const { rowIndex, columnIndex } = hoveredPixel.current;
+        selectedDottingData.forEach((dottingData, dataRowIndex) => {
+          dottingData.forEach((dottingData, dataColumnIndex) => {
+            if (dottingData === null) {
+              return;
+            }
+            tempIndicators.push({
+              rowIndex: dataRowIndex + rowIndex - widthOffset,
+              columnIndex: dataColumnIndex + columnIndex - heightOffset,
+              color: dottingData.color,
+            });
+          });
+        });
+        colorPixels(tempIndicators);
+      }
+    };
+    addCanvasElementEventListener("mousedown", colorIndicators);
+    return () => {
+      removeCanvasElementEventListener("mousedown", colorIndicators);
     };
   }, [
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
     hoveredPixel,
+    colorPixels,
+    selectedDottingData,
   ]);
 
   useEffect(() => {
@@ -73,7 +138,11 @@ export default function Home() {
     return () => {
       removeHoverPixelChangeListener(handleHoverPixelChangeHandler);
     };
-  }, [addHoverPixelChangeListener, removeHoverPixelChangeListener]);
+  }, [
+    addHoverPixelChangeListener,
+    removeHoverPixelChangeListener,
+    handleHoverPixelChangeHandler,
+  ]);
 
   const callImage = useCallback(async () => {
     dispatch(setIsReceiving(true));
@@ -82,17 +151,14 @@ export default function Home() {
         queryPrompt: prompt,
       });
       const buffers = response.data.buffers;
-      const temp: Array<{ imgUrl: string; data: DottingData }> = [];
+      const tempImgUrls: Array<string> = [];
       for (const buffer of buffers) {
         const view = new Uint8Array(buffer);
         const blob = new Blob([view], { type: "image/png" });
         const url = URL.createObjectURL(blob);
-        const { imgUrl, data } = await pixelateImage(url, 10);
-        temp.push({ imgUrl, data });
-        // for now we can save imgUrl in localStorage
-        console.log(imgUrl);
+        tempImgUrls.push(url);
       }
-      dispatch(setPixelatedData(temp));
+      dispatch(setGeneratedImgUrls(tempImgUrls));
       dispatch(setIsReceiving(false));
     } catch (error) {
       console.error(error);
@@ -120,39 +186,53 @@ export default function Home() {
       <main style={{ display: "flex", flexDirection: "column", width: "100%" }}>
         {isReceiving && <div>Receiving</div>}
         <div style={{ display: "flex" }}>
-          <Dotting ref={ref} width={"100%"} height={500} />
+          <Dotting
+            ref={ref}
+            width={"100%"}
+            height={"100vh"}
+            initData={Array(30)
+              .fill("")
+              .map((out, outIndex) => {
+                return Array(30)
+                  .fill("")
+                  .map((inner, innerIndex) => {
+                    return {
+                      color: "",
+                      rowIndex: outIndex,
+                      columnIndex: innerIndex,
+                    };
+                  });
+              })}
+          />
           <RightBar />
         </div>
-        <div
+        {/* <Center
           style={{
             alignSelf: "center",
             display: "flex",
             flexDirection: "column",
           }}
         >
-          <input
+          <Input
             value={prompt}
             style={{ fontSize: 20, margin: 5, padding: 10 }}
             onChange={(e) => {
               setPrompt(e.target.value);
             }}
           />
-          <button
+          <Button
             style={{
-              padding: 10,
+              // padding: 10,
               margin: 5,
             }}
             onClick={enhancePrompt}
           >
             Enhance prompt
-          </button>
-          <button
-            style={{ padding: 10, margin: 5, backgroundColor: "indigo" }}
-            onClick={callImage}
-          >
+          </Button>
+          <Button colorScheme="teal" style={{ margin: 5 }} onClick={callImage}>
             Generate images
-          </button>
-        </div>
+          </Button>
+        </Center> */}
       </main>
     </>
   );
