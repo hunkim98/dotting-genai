@@ -1,25 +1,29 @@
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+
+import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+
 import {
-  CanvasHoverPixelChangeHandler,
   Dotting,
-  DottingData,
   DottingRef,
-  PixelModifyItem,
   useDotting,
   useHandlers,
+  DottingData,
+  PixelModifyItem,
+  CanvasHoverPixelChangeHandler,
 } from "dotting";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { pixelateImage } from "@/utils/image/pixelateImage";
-import { getDataUri } from "@/utils/image/getDataUri";
-import RightBar from "@/components/RightBar";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
+
+import styles from "@/styles/Home.module.css";
 import { Button, Center, Input } from "@chakra-ui/react";
+import RightBarContainer from "@/components/RightBarContainer";
+
+import { getDataUri } from "@/utils/image/getDataUri";
+import { pixelateImage } from "@/utils/image/pixelateImage";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
+import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
@@ -35,6 +39,7 @@ export default function Home() {
     removeCanvasElementEventListener,
   } = useHandlers(ref);
   const { setIndicatorPixels, colorPixels } = useDotting(ref);
+  const [isRightBarActive, setIsRightBarActive] = useState(true);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -183,12 +188,19 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <main style={{ display: "flex", width: "100vw" }}>
         {isReceiving && <div>Receiving</div>}
-        <div style={{ display: "flex" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100vh",
+            display: "flex",
+            position: "relative",
+          }}
+        >
           <Dotting
             ref={ref}
-            width={"100%"}
+            width={isRightBarActive ? "calc(100% - 330px)" : "100%"}
             height={"100vh"}
             initData={Array(30)
               .fill("")
@@ -204,8 +216,21 @@ export default function Home() {
                   });
               })}
           />
-          <RightBar />
+          {isRightBarActive ? (
+            <RightBarContainer setIsRightBarActive={setIsRightBarActive} />
+          ) : (
+            <Button
+              borderRadius="16"
+              onClick={() => setIsRightBarActive(true)}
+              style={{ position: "absolute", right: "20px", top: "24px" }}
+              // colorScheme="linear-gradient(91.59deg, #309695 17.75%, rgba(238, 238, 238) 172.19%);"
+              colorScheme="teal"
+            >
+              Open Dotting Ai Assistant
+            </Button>
+          )}
         </div>
+
         {/* <Center
           style={{
             alignSelf: "center",

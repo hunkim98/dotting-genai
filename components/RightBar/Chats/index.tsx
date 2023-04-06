@@ -45,7 +45,7 @@ const Chats = ({
                 maxW="250px"
                 mb="4"
                 px="4"
-                py="3"
+                py="2.5"
                 fontSize="14"
                 borderRadius="16"
               >
@@ -70,7 +70,7 @@ const Chats = ({
                 maxW="250px"
                 mb="4"
                 px="4"
-                py="3"
+                py="2.5"
                 fontSize="14"
                 borderRadius="16"
               >
