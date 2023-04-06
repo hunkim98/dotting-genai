@@ -1,19 +1,23 @@
-import React, { useEffect, useRef } from "react";
-import { Avatar, Flex, Text } from "@chakra-ui/react";
+import React from "react";
+import { From } from "../../types";
+import { Avatar, Flex } from "@chakra-ui/react";
 import { AlwaysScrollToBottom } from "@/utils/dom/scroll";
 
 //reference: https://ordinarycoders.com/blog/article/react-chakra-ui
 const Chats = ({
+  children,
   messages,
 }: {
-  messages: Array<{ text: string; from: string }>;
+  children: React.ReactNode;
+  messages: Array<{ content: React.ReactNode; from: From }>;
 }) => {
   return (
     <Flex
       w="100%"
-      h="80%"
       overflowY="scroll"
+      flexGrow={1}
       flexDirection="column"
+      alignItems="center"
       p="3"
       bg="#EEEEEE"
       sx={{
@@ -39,12 +43,13 @@ const Chats = ({
                 color="white"
                 minW="100px"
                 maxW="250px"
-                // my="1"
-                mb="2"
-                p="3"
+                mb="4"
+                px="4"
+                py="3"
+                fontSize="14"
                 borderRadius="16"
               >
-                <Text>{item.text}</Text>
+                {item.content}
               </Flex>
             </Flex>
           );
@@ -56,24 +61,26 @@ const Chats = ({
                 // src="https://avataaars.io/?avatarStyle=Transparent&topType=LongHairStraight&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=Default&mouthType=Default&skinColor=Light"
                 bg="#309695"
                 size="sm"
-                mr="1"
+                mr="2"
               ></Avatar>
               <Flex
                 bg="white"
                 color="#313033"
                 minW="100px"
                 maxW="250px"
-                mb="2"
-                // my="1"
-                p="3"
+                mb="4"
+                px="4"
+                py="3"
+                fontSize="14"
                 borderRadius="16"
               >
-                <Text>{item.text}</Text>
+                {item.content}
               </Flex>
             </Flex>
           );
         }
       })}
+      {children}
       <AlwaysScrollToBottom />
     </Flex>
   );
