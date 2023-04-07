@@ -1,27 +1,17 @@
 import React from "react";
 import Chats from "./Chats";
 import Prompt from "./Prompt";
-import { From } from "../types";
 import { CloseIcon } from "@chakra-ui/icons";
 import { Flex, Heading } from "@chakra-ui/react";
+import { useChatContext } from "@/context/ChatContext";
 
 interface RightBarProps {
-  keyword: string;
-  children: React.ReactNode;
-  setIsRightBar: (v: boolean) => void;
-  messages: Array<{ content: React.ReactNode; from: From }>;
   handleSubmit: (e: React.FormEvent<HTMLElement>) => void;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const RightBar = ({
-  keyword,
-  children,
-  messages,
-  handleSubmit,
-  handleChange,
-  setIsRightBar,
-}: RightBarProps) => {
+export const RightBar = ({ handleSubmit }: RightBarProps) => {
+  const { setIsRightBar } = useChatContext();
+
   return (
     <Flex
       w="330px"
@@ -49,13 +39,9 @@ export const RightBar = ({
           </button>
         </Flex>
 
-        <Chats messages={messages}>{children}</Chats>
+        <Chats />
 
-        <Prompt
-          keyword={keyword}
-          handleSubmit={handleSubmit}
-          handleChange={handleChange}
-        />
+        <Prompt handleSubmit={handleSubmit} />
       </Flex>
     </Flex>
   );

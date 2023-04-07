@@ -1,16 +1,36 @@
-import React from "react";
-import { From } from "../../types";
+import React, { useState } from "react";
+
+import Options from "../Options";
 import { Avatar, Flex } from "@chakra-ui/react";
+import { useChatContext } from "@/context/ChatContext";
 import { AlwaysScrollToBottom } from "@/utils/dom/scroll";
 
 //reference: https://ordinarycoders.com/blog/article/react-chakra-ui
-const Chats = ({
-  children,
-  messages,
-}: {
-  children: React.ReactNode;
-  messages: Array<{ content: React.ReactNode; from: From }>;
-}) => {
+const Chats = () => {
+  const { messages } = useChatContext();
+  const [options, setOptions] = useState<
+    { title: string; action: () => void }[]
+  >([
+    {
+      title: "Create me an asset",
+      action: () => {
+        console.log("Create me an asset");
+      },
+    },
+    {
+      title: "Create me a background",
+      action: () => {
+        console.log("Create me a background");
+      },
+    },
+    {
+      title: "Ask for other options",
+      action: () => {
+        console.log("Ask for other options");
+      },
+    },
+  ]);
+
   return (
     <Flex
       w="100%"
@@ -80,7 +100,9 @@ const Chats = ({
           );
         }
       })}
-      {children}
+      {/* This is the part to be displayed under the CHAT component. */}
+      {/* Specify options state for each step as children */}
+      <Options options={options} />
       <AlwaysScrollToBottom />
     </Flex>
   );

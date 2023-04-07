@@ -22,15 +22,19 @@ import RightBarContainer from "@/components/RightBarContainer";
 import { getDataUri } from "@/utils/image/getDataUri";
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+
+import { useChatContext } from "@/context/ChatContext";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
+  const [prompt, setPrompt] = useState<string>("");
+  const { isRightBar, setIsRightBar } = useChatContext();
   const { selectedDottingData, setSelectedDottingData } =
     useContext(GenAiDataContext);
   const isReceiving = useAppSelector((state) => state.genAi.isReceiving);
-  const [prompt, setPrompt] = useState<string>("");
+
   const dispatch = useAppDispatch();
   const {
     addHoverPixelChangeListener,
@@ -39,7 +43,6 @@ export default function Home() {
     removeCanvasElementEventListener,
   } = useHandlers(ref);
   const { setIndicatorPixels, colorPixels } = useDotting(ref);
-  const [isRightBar, setIsRightBar] = useState(true);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -217,7 +220,7 @@ export default function Home() {
               })}
           />
           {isRightBar ? (
-            <RightBarContainer setIsRightBar={setIsRightBar} />
+            <RightBarContainer />
           ) : (
             <Button
               borderRadius="16"

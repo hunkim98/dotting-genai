@@ -3,7 +3,7 @@ import { Button, Flex } from "@chakra-ui/react";
 interface OptionsProps {
   options: {
     title: string;
-    action: () => void;
+    action: () => void; // TODO: modify function type
   }[];
 }
 
