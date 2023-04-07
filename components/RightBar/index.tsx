@@ -8,7 +8,7 @@ import { Flex, Heading } from "@chakra-ui/react";
 interface RightBarProps {
   keyword: string;
   children: React.ReactNode;
-  setIsRightBarActive: (v: boolean) => void;
+  setIsRightBar: (v: boolean) => void;
   messages: Array<{ content: React.ReactNode; from: From }>;
   handleSubmit: (e: React.FormEvent<HTMLElement>) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -20,7 +20,7 @@ export const RightBar = ({
   messages,
   handleSubmit,
   handleChange,
-  setIsRightBarActive,
+  setIsRightBar,
 }: RightBarProps) => {
   return (
     <Flex
@@ -44,7 +44,7 @@ export const RightBar = ({
           <Heading as="h5" size="sm" w="180px">
             Dotting AI Assistant
           </Heading>
-          <button onClick={() => setIsRightBarActive(false)}>
+          <button onClick={() => setIsRightBar(false)}>
             <CloseIcon boxSize={3.5} />
           </button>
         </Flex>

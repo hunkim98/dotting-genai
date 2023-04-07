@@ -39,7 +39,7 @@ export default function Home() {
     removeCanvasElementEventListener,
   } = useHandlers(ref);
   const { setIndicatorPixels, colorPixels } = useDotting(ref);
-  const [isRightBarActive, setIsRightBarActive] = useState(true);
+  const [isRightBar, setIsRightBar] = useState(true);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -52,7 +52,7 @@ export default function Home() {
         if (indices === null) {
           return;
         }
-        console.log("hi");
+
         const { rowIndex, columnIndex } = indices;
         hoveredPixel.current = {
           rowIndex,
@@ -200,7 +200,7 @@ export default function Home() {
         >
           <Dotting
             ref={ref}
-            width={isRightBarActive ? "calc(100% - 330px)" : "100%"}
+            width={isRightBar ? "calc(100% - 330px)" : "100%"}
             height={"100vh"}
             initData={Array(30)
               .fill("")
@@ -216,12 +216,12 @@ export default function Home() {
                   });
               })}
           />
-          {isRightBarActive ? (
-            <RightBarContainer setIsRightBarActive={setIsRightBarActive} />
+          {isRightBar ? (
+            <RightBarContainer setIsRightBar={setIsRightBar} />
           ) : (
             <Button
               borderRadius="16"
-              onClick={() => setIsRightBarActive(true)}
+              onClick={() => setIsRightBar(true)}
               style={{ position: "absolute", right: "20px", top: "24px" }}
               // colorScheme="linear-gradient(91.59deg, #309695 17.75%, rgba(238, 238, 238) 172.19%);"
               colorScheme="teal"

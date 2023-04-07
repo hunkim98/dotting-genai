@@ -8,9 +8,9 @@ import Options from "../RightBar/Options";
 // import GenAiImage from "./GenAiImage";
 
 export const RightBarContainer = ({
-  setIsRightBarActive,
+  setIsRightBar,
 }: {
-  setIsRightBarActive: (v: boolean) => void;
+  setIsRightBar: (v: boolean) => void;
 }) => {
   // DESC: search keyword for prompt
   const [keyword, setKeyword] = useState("");
@@ -104,7 +104,7 @@ export const RightBarContainer = ({
         messages={messages}
         handleSubmit={handleSubmit}
         handleChange={handleChangeKeyword}
-        setIsRightBarActive={setIsRightBarActive}
+        setIsRightBar={setIsRightBar}
       >
         {/* This is the part to be displayed under the CHAT component. */}
         {/* Specify options state for each step as children */}
