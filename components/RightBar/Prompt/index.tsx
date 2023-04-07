@@ -1,15 +1,25 @@
+import { useCallback } from "react";
 import Image from "next/image";
 import send from "@/public/send-filled.svg";
 import { Flex, Input } from "@chakra-ui/react";
 import { useChatContext } from "@/context/ChatContext";
 
-interface PromptProps {
-  handleSubmit: (e: React.FormEvent<HTMLElement>) => void;
-}
-
-const Prompt = ({ handleSubmit }: PromptProps) => {
+const Prompt = () => {
   const { keyword, setKeyword } = useChatContext();
 
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLElement>) => {
+      e.preventDefault();
+      if (!keyword.trim()) {
+        setKeyword("");
+        return;
+      }
+      // TODO: to get image
+      setKeyword("");
+    },
+    [keyword, setKeyword]
+  );
+  
   return (
     <form onSubmit={handleSubmit}>
       <Flex bg="#E9E9E9" minH="72px" w="100%" px="4" pt="3" pb="5">

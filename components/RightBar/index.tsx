@@ -5,11 +5,7 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { Flex, Heading } from "@chakra-ui/react";
 import { useChatContext } from "@/context/ChatContext";
 
-interface RightBarProps {
-  handleSubmit: (e: React.FormEvent<HTMLElement>) => void;
-}
-
-export const RightBar = ({ handleSubmit }: RightBarProps) => {
+export const RightBar = () => {
   const { setIsRightBar } = useChatContext();
 
   return (
@@ -41,7 +37,7 @@ export const RightBar = ({ handleSubmit }: RightBarProps) => {
 
         <Chats />
 
-        <Prompt handleSubmit={handleSubmit} />
+        <Prompt />
       </Flex>
     </Flex>
   );
