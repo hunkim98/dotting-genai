@@ -1,18 +1,18 @@
 import React from "react";
 import Options from "../Options";
-import TextType from "./TextType";
+import TextType from "./Type/TextType";
 import { Flex } from "@chakra-ui/react";
 import Loading from "@/components/Loading";
 
 import { useAppSelector } from "@/lib/hooks";
-import GenAiImageType from "./GenAiImageType";
+import GenAiImageType from "./Type/GenAiImageType";
 import { ChatType } from "@/types/aiAssistant";
 import { AlwaysScrollToBottom } from "@/utils/dom/scroll";
 
 //reference: https://ordinarycoders.com/blog/article/react-chakra-ui
 const Chats = () => {
   const { isReceiving } = useAppSelector((state) => state.genAi);
-  const { messages, options, isOptionsVisible } = useAppSelector(
+  const { messages, isOptionsVisible } = useAppSelector(
     (state) => state.aiAssistant
   );
 
@@ -55,7 +55,7 @@ const Chats = () => {
         }
       })}
       {isReceiving && <Loading />}
-      {isOptionsVisible && <Options options={options} />}
+      {isOptionsVisible && <Options />}
       <AlwaysScrollToBottom />
     </Flex>
   );

@@ -1,16 +1,18 @@
 import Image from "next/image";
 import send from "@/public/send-filled.svg";
-import { useAppSelector } from "@/lib/hooks";
 import { Flex, Input } from "@chakra-ui/react";
+import { setPrompt } from "@/lib/modules/aiAssistant";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 interface PromptProps {
-  prompt: string;
-  setPrompt: React.Dispatch<React.SetStateAction<string>>;
   onSubmit: (e: React.FormEvent<HTMLElement>) => void;
 }
 
-const Prompt = ({ prompt, setPrompt, onSubmit }: PromptProps) => {
-  const { isPromptDisabled } = useAppSelector((state) => state.aiAssistant);
+const Prompt = ({ onSubmit }: PromptProps) => {
+  const dispatch = useAppDispatch();
+  const { prompt, isPromptDisabled } = useAppSelector(
+    (state) => state.aiAssistant
+  );
 
   return (
     <form onSubmit={onSubmit}>
@@ -27,7 +29,7 @@ const Prompt = ({ prompt, setPrompt, onSubmit }: PromptProps) => {
             outline: "none",
           }}
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={(e) => dispatch(setPrompt(e.target.value))}
         />
         <button type="submit" onClick={onSubmit} disabled={isPromptDisabled}>
           <Image src={send} width={24} height={24} alt="send" />

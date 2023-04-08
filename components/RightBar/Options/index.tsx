@@ -1,43 +1,18 @@
-import { Button, Flex } from "@chakra-ui/react";
-import { OptionType } from "@/types/aiAssistant";
+import { useAppSelector } from "@/lib/hooks";
+import SelectCreatingAssetMode from "./Step/0";
+import SelectHowToGetImageMode from "./Step/1";
+import SelectWhatsNextUp from "./Step/2";
 
-interface OptionsProps {
-  options: OptionType[];
-}
+const Options = () => {
+  const { step } = useAppSelector((state) => state.aiAssistant);
 
-const Options = ({ options }: OptionsProps) => {
-  return (
-    <>
-      {options?.map(({ title, action }, index) => {
-        return (
-          <Flex key={index} direction="column" alignItems="center">
-            <Button
-              px="5"
-              my="2.5"
-              size="md"
-              height="8"
-              fontSize="12"
-              borderRadius="20"
-              onClick={action}
-              colorScheme="teal"
-            >
-              {title}
-            </Button>
-            {index === options?.length - 1 ? (
-              <></>
-            ) : (
-              <hr
-                style={{
-                  width: "170px",
-                  border: "0.5px solid rgba(196, 196, 196, 0.8)",
-                }}
-              />
-            )}
-          </Flex>
-        );
-      })}
-    </>
-  );
+  if (step === 0) {
+    return <SelectCreatingAssetMode />;
+  } else if (step === 1) {
+    return <SelectHowToGetImageMode />;
+  } else {
+    return <SelectWhatsNextUp />;
+  }
 };
 
 export default Options;

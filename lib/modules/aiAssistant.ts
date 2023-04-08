@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { MessageType, OptionType } from "@/types/aiAssistant";
+import { MessageType } from "@/types/aiAssistant";
 
 export type AiAssistantState = {
   step: number;
+  prompt: string;
   isRightBar: boolean;
-  options: OptionType[];
   messages: MessageType[];
   isPromptDisabled: boolean;
   isOptionsVisible: boolean;
@@ -13,14 +13,13 @@ export type AiAssistantState = {
 
 export const InitialState: AiAssistantState = {
   step: 0,
+  prompt: "",
+  uploadedImgFile: "",
   isRightBar: false,
   isOptionsVisible: true,
   isPromptDisabled: true,
-  options: [] as OptionType[],
   messages: [] as MessageType[],
-  uploadedImgFile: "",
 };
-
 
 export const aiAssistantModule = createSlice({
   name: "aiAssistant",
@@ -29,8 +28,8 @@ export const aiAssistantModule = createSlice({
     setIsRightBar: (state, action) => {
       state.isRightBar = action.payload;
     },
-    setOptions: (state, action) => {
-      state.options = action.payload;
+    setPrompt: (state, action) => {
+      state.prompt = action.payload;
     },
     setMessages: (state, action) => {
       state.messages = action.payload;
@@ -55,7 +54,7 @@ export const aiAssistantModule = createSlice({
 
 export const {
   setStep,
-  setOptions,
+  setPrompt,
   setMessages,
   addMessages,
   setIsRightBar,

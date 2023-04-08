@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import axios from "axios";
 import Head from "next/head";
 import { Button } from "@chakra-ui/react";
@@ -14,7 +14,7 @@ import {
 } from "dotting";
 import {
   setStep,
-  setOptions,
+  setPrompt,
   setMessages,
   addMessages,
   setIsRightBar,
@@ -28,13 +28,9 @@ import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
-  const [prompt, setPrompt] = useState<string>("");
 
   const dispatch = useAppDispatch();
-  const generatedImgUrls = useAppSelector(
-    (state) => state.genAi.generatedImgUrls
-  );
-  const { step, isRightBar, messages, uploadedImgFile } = useAppSelector(
+  const { prompt, step, isRightBar, messages } = useAppSelector(
     (state) => state.aiAssistant
   );
   const { selectedDottingData, setSelectedDottingData } =
@@ -163,7 +159,7 @@ export default function Home() {
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       if (!prompt.trim()) {
-        setPrompt("");
+        dispatch(setPrompt(""));
         return;
       }
 
@@ -182,6 +178,7 @@ export default function Home() {
         ])
       );
 
+      // for loading, and disable prompt
       dispatch(setIsReceiving(true));
       dispatch(setIsPromptDisabled(true));
       try {
@@ -190,22 +187,23 @@ export default function Home() {
           { prompt },
           { responseType: "arraybuffer" }
         );
-        const imgB = response.data;
-        const buffer = Buffer.from(imgB, "utf-8");
+        const img = response.data;
+        const buffer = Buffer.from(img, "utf-8");
         const bufferData = buffer.toJSON().data;
         const view = new Uint8Array(bufferData);
         const blob = new Blob([view], { type: "image/png" });
         const url = URL.createObjectURL(blob);
         const tempImgUrls: Array<string> = [url];
         dispatch(setGeneratedImgUrls(tempImgUrls));
-        console.log(prompt);
 
         dispatch(
           addMessages([
             {
               type: ChatType.TEXT,
               from: From.AI,
-              content: `‘${prompt}’ images have been generated. Use the below sliders to control the pixel grids. Click the image if you would like to use it on your canvas.`,
+              content: `‘${prompt}’ images have been generated. 
+              Use the below sliders to control the pixel grids. 
+              Click the image if you would like to use it on your canvas.`,
             },
             ...tempImgUrls.map((url) => {
               return {
@@ -220,6 +218,7 @@ export default function Home() {
         console.error(error);
         alert("Error has happened while generating image data");
       }
+      // for next step
       dispatch(setStep(2));
       dispatch(setIsReceiving(false));
       dispatch(setIsOptionsVisible(true));
@@ -227,30 +226,7 @@ export default function Home() {
     [prompt, dispatch]
   );
 
-  // step 0-1 (Create me an asset)
-  const createAsset = useCallback(() => {
-    dispatch(setStep(1));
-  }, [dispatch]);
-
-  // step 0-1
-  const createBackground = useCallback(() => {}, []);
-
-  // step 1-1
-  const generateAIWithPrompt = useCallback(() => {
-    dispatch(setStep(2));
-    dispatch(setIsPromptDisabled(false));
-    dispatch(setIsOptionsVisible(false));
-  }, [dispatch]);
-
-  // step 1-2
-  const uploadLocalImageFile = useCallback(() => {
-  }, [uploadedImgFile]);
-
-  // step 2-1
-  const regenerate = useCallback(async () => {
-    callImage();
-  }, [callImage]);
-
+  // for accumulating messages log
   useEffect(() => {
     if (step === 0) {
       dispatch(
@@ -260,18 +236,6 @@ export default function Home() {
             type: ChatType.TEXT,
             From: From.AI,
             content: "Hello this is Dotting Ai, how may I help you?",
-          },
-        ])
-      );
-      dispatch(
-        setOptions([
-          {
-            title: "Create me an asset",
-            action: createAsset,
-          },
-          {
-            title: "Create me a background",
-            action: createBackground,
           },
         ])
       );
@@ -285,18 +249,6 @@ export default function Home() {
           },
         ])
       );
-      dispatch(
-        setOptions([
-          {
-            title: "Generate asset AI with prompt",
-            action: generateAIWithPrompt,
-          },
-          {
-            title: "Upload local image file",
-            action: uploadLocalImageFile,
-          },
-        ])
-      );
     } else if (step === 2) {
       dispatch(
         addMessages([
@@ -307,28 +259,13 @@ export default function Home() {
           },
         ])
       );
-      dispatch(
-        setOptions([
-          {
-            title: "Regenerate",
-            action: regenerate,
-          },
-          {
-            title: "Ask for other options",
-            action: () => {
-              setPrompt("");
-              dispatch(setStep(0));
-            },
-          },
-        ])
-      );
     }
   }, [step]);
 
   return (
     <>
       <Head>
-        <title>Create Next App</title>
+        <title>Dotting gen-ai</title>
         <meta name="description" content="Generated by create next app" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -360,19 +297,8 @@ export default function Home() {
                   });
               })}
           />
-          {/* {generatedImgUrls.length > 0 && (
-            <GenAiImage
-              key={generatedImgUrls[0]}
-              rawImageUrl={generatedImgUrls[0]}
-              initPixelationDegree={10}
-            />
-          )} */}
           {isRightBar ? (
-            <RightBar
-              prompt={prompt}
-              onSubmit={callImage}
-              setPrompt={setPrompt}
-            />
+            <RightBar onSubmit={callImage} />
           ) : (
             <Button
               borderRadius="16"

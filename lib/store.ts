@@ -1,6 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
-
 import { traceApi } from "./api/traceApi";
 import { genAiModule } from "./modules/genAi";
 import { aiAssistantModule } from "./modules/aiAssistant";
@@ -12,10 +11,7 @@ export const makeStore = () =>
       [genAiModule.name]: genAiModule.reducer,
       [aiAssistantModule.name]: aiAssistantModule.reducer,
     },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({ serializableCheck: false }).concat(
-        traceApi.middleware
-      ),
+    middleware: (gDM) => gDM().concat(traceApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

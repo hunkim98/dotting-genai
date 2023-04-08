@@ -9,12 +9,10 @@ import { useAppDispatch } from "@/lib/hooks";
 import { setIsRightBar } from "@/lib/modules/aiAssistant";
 
 interface RightBarProps {
-  prompt: string;
-  setPrompt: React.Dispatch<React.SetStateAction<string>>;
   onSubmit: (e: React.FormEvent<HTMLElement>) => void;
 }
 
-export const RightBar = ({ prompt, setPrompt, onSubmit }: RightBarProps) => {
+export const RightBar = ({ onSubmit }: RightBarProps) => {
   const dispatch = useAppDispatch();
 
   return (
@@ -46,7 +44,7 @@ export const RightBar = ({ prompt, setPrompt, onSubmit }: RightBarProps) => {
 
         <Chats />
 
-        <Prompt prompt={prompt} setPrompt={setPrompt} onSubmit={onSubmit} />
+        <Prompt onSubmit={onSubmit} />
       </Flex>
     </Flex>
   );
