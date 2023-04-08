@@ -9,7 +9,12 @@ import { DottingData, PixelModifyItem } from "dotting";
 export async function pixelateImage(
   imageUrl: string,
   pixelationFactor: number
-): Promise<{ imgUrl: string; data: DottingData }> {
+): Promise<{
+  imgUrl: string;
+  data: DottingData;
+  width: number;
+  height: number;
+}> {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d")!;
   return new Promise((resolve, reject) => {
@@ -40,10 +45,14 @@ export async function pixelateImage(
         const pixelSkipAmount = Math.floor(
           Math.max(originalWidth, originalHeight) / maxPixelEdgeCount
         );
+        let validRowCount = 0;
+        let validColumnCount = 0;
         if (pixelationFactor !== 0) {
           for (let y = 0; y < originalHeight; y += pixelSkipAmount) {
             rowIndex++;
             pixelData.set(rowIndex, new Map());
+            let isCurrentColumnValid = false;
+            let currentRowCount = 0;
             for (let x = 0; x < originalWidth; x += pixelSkipAmount) {
               // extracting the position of the sample pixel
               const pixelIndexPosition = (x + y * originalWidth) * 4;
@@ -53,18 +62,31 @@ export async function pixelateImage(
               const blue = originalImageData[pixelIndexPosition + 2];
               const alpha = originalImageData[pixelIndexPosition + 3];
               let color = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-              if (alpha === 0) {
-                color = "";
+              if (alpha !== 0) {
+                isCurrentColumnValid = true;
+                currentRowCount++;
+                context.fillStyle = color;
+                context.fillRect(x, y, pixelSkipAmount, pixelSkipAmount);
+                pixelData.get(rowIndex)!.set(columnIndex, { color });
               }
-              context.fillStyle = color;
-              context.fillRect(x, y, pixelSkipAmount, pixelSkipAmount);
-              pixelData.get(rowIndex)!.set(columnIndex, { color });
+
+              if (currentRowCount > validRowCount) {
+                validRowCount = currentRowCount;
+              }
               columnIndex++;
+            }
+            if (isCurrentColumnValid) {
+              validColumnCount++;
             }
             columnIndex = 0;
           }
         }
-        resolve({ imgUrl: canvas.toDataURL(), data: pixelData });
+        resolve({
+          imgUrl: canvas.toDataURL(),
+          data: pixelData,
+          width: Math.floor(originalWidth / pixelSkipAmount),
+          height: Math.floor(originalHeight / pixelSkipAmount),
+        });
       };
       imageObject.onerror = (error) => {
         console.log(error, "This is from pixelateImage.ts");

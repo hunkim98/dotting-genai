@@ -11,6 +11,8 @@ import {
 import { useAppDispatch } from "@/lib/hooks";
 import { ChatType, From } from "@/types/aiAssistant";
 import { setIsReceiving } from "@/lib/modules/genAi";
+import axios from "axios";
+import { BG_REMOVE_URL } from "@/constants/urls";
 
 // DESC: step 1 - Generate asset AI with prompt, Upload local image file
 const Step1 = () => {
@@ -40,12 +42,23 @@ const Step1 = () => {
 
       const file = imgRef.current.files[0];
       const imgUrl = URL.createObjectURL(file);
-      const tempImgUrls: Array<string> = [];
-      tempImgUrls.push(imgUrl);
+      const formData = new FormData();
+      formData.append("fileobj", file);
+      const response = await axios.post(`${BG_REMOVE_URL}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "arraybuffer",
+      });
+      console.log(response.data);
+      const img = response.data;
+      const buffer = Buffer.from(img, "utf-8");
+      const bufferData = buffer.toJSON().data;
+      const view = new Uint8Array(bufferData);
+      const blob = new Blob([view], { type: "image/png" });
+      const url = URL.createObjectURL(blob);
+      const tempImgUrls: Array<string> = [url];
       dispatch(setUploadedImgUrls(tempImgUrls));
-
-      setTimeout(() => {}, 1000);
-
       try {
         dispatch(
           addMessages([

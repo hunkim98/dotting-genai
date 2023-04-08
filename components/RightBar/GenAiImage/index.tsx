@@ -22,16 +22,23 @@ interface Props {
 
 const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
   const [previewImgUrl, setPreviewImgUrl] = useState<string | null>(null);
+  const [previewDimensions, setPreviewDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const dispatch = useAppDispatch();
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [pixelationDegree, setPixelationDegree] =
     useState<number>(initPixelationDegree);
   const dottingData = useRef<DottingData | null>(null);
   useEffect(() => {
-    pixelateImage(rawImageUrl, pixelationDegree).then(({ imgUrl, data }) => {
-      setPreviewImgUrl(imgUrl);
-      dottingData.current = data;
-    });
+    pixelateImage(rawImageUrl, pixelationDegree).then(
+      ({ imgUrl, data, width, height }) => {
+        setPreviewImgUrl(imgUrl);
+        setPreviewDimensions({ width, height });
+        dottingData.current = data;
+      }
+    );
   }, [rawImageUrl, pixelationDegree, dottingData]);
   const { setSelectedDottingData } = useContext(GenAiDataContext);
 
@@ -90,8 +97,13 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
             setIsHovered(false);
           }}
           onClick={() => {
-            if (dottingData.current) {
-              setSelectedDottingData(dottingData.current);
+            if (dottingData.current && previewDimensions) {
+              console.log(previewDimensions);
+              setSelectedDottingData({
+                data: dottingData.current,
+                width: previewDimensions.width,
+                height: previewDimensions.height,
+              });
             }
           }}
         />
