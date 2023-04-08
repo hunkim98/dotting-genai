@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.18",
     "@chakra-ui/react": "^2.5.4",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
@@ -20,7 +21,7 @@
     "dotting": "^1.0.8",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
-    "framer-motion": "^10.9.2",
+    "framer-motion": "^10.10.0",
     "next": "13.2.4",
     "next-redux-wrapper": "^8.1.0",
     "openai": "^3.2.1",

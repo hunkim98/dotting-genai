@@ -1,33 +1,41 @@
+import { useCallback, useContext, useEffect, useRef } from "react";
+import axios from "axios";
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import { Button } from "@chakra-ui/react";
+import RightBar from "@/components/RightBar";
+
 import {
-  CanvasHoverPixelChangeHandler,
   Dotting,
-  DottingData,
   DottingRef,
-  PixelModifyItem,
   useDotting,
   useHandlers,
+  PixelModifyItem,
+  CanvasHoverPixelChangeHandler,
 } from "dotting";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { pixelateImage } from "@/utils/image/pixelateImage";
-import { getDataUri } from "@/utils/image/getDataUri";
-import RightBar from "@/components/RightBar";
+import {
+  setStep,
+  setPrompt,
+  setMessages,
+  addMessages,
+  setIsRightBar,
+  setIsOptionsVisible,
+  setIsPromptDisabled,
+} from "@/lib/modules/aiAssistant";
+import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
-import { Button, Center, Input } from "@chakra-ui/react";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
+import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
+
+  const dispatch = useAppDispatch();
+  const { prompt, step, isRightBar, messages } = useAppSelector(
+    (state) => state.aiAssistant
+  );
   const { selectedDottingData, setSelectedDottingData } =
     useContext(GenAiDataContext);
-  const isReceiving = useAppSelector((state) => state.genAi.isReceiving);
-  const [prompt, setPrompt] = useState<string>("");
-  const dispatch = useAppDispatch();
+
   const {
     addHoverPixelChangeListener,
     removeHoverPixelChangeListener,
@@ -47,7 +55,7 @@ export default function Home() {
         if (indices === null) {
           return;
         }
-        console.log("hi");
+
         const { rowIndex, columnIndex } = indices;
         hoveredPixel.current = {
           rowIndex,
@@ -144,51 +152,136 @@ export default function Home() {
     handleHoverPixelChangeHandler,
   ]);
 
-  const callImage = useCallback(async () => {
-    dispatch(setIsReceiving(true));
-    try {
-      const response = await axios.post("api/openai/dalle", {
-        queryPrompt: prompt,
-      });
-      const buffers = response.data.buffers;
-      const tempImgUrls: Array<string> = [];
-      for (const buffer of buffers) {
-        const view = new Uint8Array(buffer);
+  /* 
+    🖍 ABOUT RightBar
+  */
+  const callImage = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      if (!prompt.trim()) {
+        dispatch(setPrompt(""));
+        return;
+      }
+
+      dispatch(
+        addMessages([
+          {
+            type: ChatType.TEXT,
+            from: From.USER,
+            content: `${prompt}`,
+          },
+          {
+            type: ChatType.TEXT,
+            from: From.AI,
+            content: "Generating image... Please wait a few seconds.",
+          },
+        ])
+      );
+
+      // for loading, and disable prompt
+      dispatch(setIsReceiving(true));
+      dispatch(setIsPromptDisabled(true));
+      try {
+        const response = await axios.post(
+          "http://34.64.163.60:3000/txt2img",
+          { prompt },
+          { responseType: "arraybuffer" }
+        );
+        const img = response.data;
+        const buffer = Buffer.from(img, "utf-8");
+        const bufferData = buffer.toJSON().data;
+        const view = new Uint8Array(bufferData);
         const blob = new Blob([view], { type: "image/png" });
         const url = URL.createObjectURL(blob);
-        tempImgUrls.push(url);
-      }
-      dispatch(setGeneratedImgUrls(tempImgUrls));
-      dispatch(setIsReceiving(false));
-    } catch (error) {
-      console.error(error);
-      alert("Error has happened while generating image data");
-      dispatch(setIsReceiving(false));
-    }
-  }, [dispatch, prompt]);
+        const tempImgUrls: Array<string> = [url];
+        dispatch(setGeneratedImgUrls(tempImgUrls));
 
-  const enhancePrompt = useCallback(async () => {
-    if (!prompt) {
-      alert("Please enter a prompt");
-      return;
+        dispatch(
+          addMessages([
+            {
+              type: ChatType.TEXT,
+              from: From.AI,
+              content: `‘${prompt}’ images have been generated. 
+              Use the below sliders to control the pixel grids. 
+              Click the image if you would like to use it on your canvas.`,
+            },
+            ...tempImgUrls.map((url) => {
+              return {
+                type: ChatType.GENAIIMAGE,
+                from: From.AI,
+                content: url,
+              };
+            }),
+          ])
+        );
+      } catch (error) {
+        console.error(error);
+        alert("Error has happened while generating image data");
+      }
+      // for next step
+      dispatch(setStep(2));
+      dispatch(setIsReceiving(false));
+      dispatch(setIsOptionsVisible(true));
+    },
+    [prompt, dispatch]
+  );
+
+  // for accumulating messages log
+  useEffect(() => {
+    if (step === 0) {
+      dispatch(
+        setMessages([
+          ...messages,
+          {
+            type: ChatType.TEXT,
+            From: From.AI,
+            content: "Hello this is Dotting Ai, how may I help you?",
+          },
+        ])
+      );
+    } else if (step === 1) {
+      dispatch(
+        addMessages([
+          {
+            type: ChatType.TEXT,
+            From: From.AI,
+            content: "How would you like to create an asset?",
+          },
+        ])
+      );
+    } else if (step === 2) {
+      dispatch(
+        addMessages([
+          {
+            type: ChatType.TEXT,
+            From: From.AI,
+            content: "Please input your prompt.",
+          },
+        ])
+      );
     }
-    setPrompt("cartoon-style " + prompt + " with white background");
-  }, [prompt, setPrompt]);
+  }, [step]);
 
   return (
     <>
       <Head>
-        <title>Create Next App</title>
+        <title>Dotting gen-ai</title>
         <meta name="description" content="Generated by create next app" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-        {isReceiving && <div>Receiving</div>}
-        <div style={{ display: "flex" }}>
+      <main style={{ display: "flex", width: "100vw" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100vh",
+            display: "flex",
+            position: "relative",
+          }}
+        >
           <Dotting
             ref={ref}
-            width={"100%"}
+            width={isRightBar ? "calc(100% - 330px)" : "100%"}
             height={"100vh"}
             initData={Array(30)
               .fill("")
@@ -204,35 +297,19 @@ export default function Home() {
                   });
               })}
           />
-          <RightBar />
+          {isRightBar ? (
+            <RightBar onSubmit={callImage} />
+          ) : (
+            <Button
+              borderRadius="16"
+              onClick={() => dispatch(setIsRightBar(true))}
+              style={{ position: "absolute", right: "20px", top: "24px" }}
+              colorScheme="teal"
+            >
+              Open Dotting Ai Assistant
+            </Button>
+          )}
         </div>
-        {/* <Center
-          style={{
-            alignSelf: "center",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Input
-            value={prompt}
-            style={{ fontSize: 20, margin: 5, padding: 10 }}
-            onChange={(e) => {
-              setPrompt(e.target.value);
-            }}
-          />
-          <Button
-            style={{
-              // padding: 10,
-              margin: 5,
-            }}
-            onClick={enhancePrompt}
-          >
-            Enhance prompt
-          </Button>
-          <Button colorScheme="teal" style={{ margin: 5 }} onClick={callImage}>
-            Generate images
-          </Button>
-        </Center> */}
       </main>
     </>
   );

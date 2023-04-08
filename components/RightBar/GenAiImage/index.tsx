@@ -1,17 +1,15 @@
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import {
   Box,
-  Grid,
   GridItem,
-  Heading,
   Slider,
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
 } from "@chakra-ui/react";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { DottingData, PixelData } from "@/../dotting/build/src";
+import { DottingData } from "@/../dotting/build/src";
 import { useAppDispatch } from "@/lib/hooks";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
 
@@ -63,7 +61,6 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
         width={160}
         height={160}
         onClick={() => {
-          console.log(typeof dottingData.current, "current");
           if (dottingData.current) {
             setSelectedDottingData(dottingData.current);
           }
@@ -82,9 +79,9 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
         //   setPixelationDegree(val);
         // }}
       >
-        <SliderTrack bg="red.100">
+        <SliderTrack bg="green.100">
           <Box position="relative" right={10} />
-          <SliderFilledTrack bg="tomato" />
+          <SliderFilledTrack bg="teal" />
         </SliderTrack>
         <SliderThumb boxSize={6} />
       </Slider>

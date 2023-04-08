@@ -1,28 +1,23 @@
-import { useAppSelector } from "@/lib/hooks";
-import {
-  Box,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  Slider,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderTrack,
-} from "@chakra-ui/react";
-import Image from "next/image";
 import React from "react";
-import Chats from "./Chats";
-import GenAiImage from "./GenAiImage";
 
-export const RightBar = () => {
-  const isReceiving = useAppSelector((state) => state.genAi.isReceiving);
-  const generatedImgUrls = useAppSelector(
-    (state) => state.genAi.generatedImgUrls
-  );
+import Chats from "./Chats";
+import Prompt from "./Prompt";
+import { CloseIcon } from "@chakra-ui/icons";
+import { Flex, Heading } from "@chakra-ui/react";
+
+import { useAppDispatch } from "@/lib/hooks";
+import { setIsRightBar } from "@/lib/modules/aiAssistant";
+
+interface RightBarProps {
+  onSubmit: (e: React.FormEvent<HTMLElement>) => void;
+}
+
+export const RightBar = ({ onSubmit }: RightBarProps) => {
+  const dispatch = useAppDispatch();
+
   return (
     <Flex
-      w="300px"
+      w="330px"
       h="100vh"
       justify="center"
       align="center"
@@ -32,38 +27,24 @@ export const RightBar = () => {
       }}
     >
       <Flex w="100%" h="100%" flexDir="column">
-        <Heading as="h5" size="sm">
-          Generated Pixels
-        </Heading>
-        <Chats
-          messages={[
-            { from: "user", text: "hi" },
-            { from: "ai", text: "hello" },
-          ]}
-        />
-
-        {/* <div
-          style={{
-            position: "relative",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "10px 0",
-          }}
+        <Flex
+          w="100%"
+          h="66px"
+          p="5"
+          align="center"
+          justifyContent="space-between"
         >
-          <Grid gap={6}>
-            {generatedImgUrls.map((url, index) => {
-              return (
-                <GenAiImage
-                  key={url}
-                  rawImageUrl={url}
-                  initPixelationDegree={10}
-                />
-              );
-            })}
-          </Grid>
-        </div> */}
+          <Heading as="h5" size="sm" w="180px">
+            Dotting AI Assistant
+          </Heading>
+          <button onClick={() => dispatch(setIsRightBar(false))}>
+            <CloseIcon boxSize={3.5} />
+          </button>
+        </Flex>
+
+        <Chats />
+
+        <Prompt onSubmit={onSubmit} />
       </Flex>
     </Flex>
   );
