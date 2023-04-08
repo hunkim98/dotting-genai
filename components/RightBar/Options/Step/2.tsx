@@ -9,6 +9,7 @@ import {
   setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
 import ButtonType from "../Type/ButtonType";
+import { DIFFUSION_URL } from '@/constants/urls';
 import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
@@ -37,7 +38,7 @@ const Step2 = () => {
 
     try {
       const response = await axios.post(
-        "http://34.64.163.60:3000/txt2img",
+        `${DIFFUSION_URL}`,
         { prompt },
         { responseType: "arraybuffer" }
       );

@@ -25,6 +25,7 @@ import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
+import { DIFFUSION_URL } from "@/constants/urls";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
@@ -183,7 +184,7 @@ export default function Home() {
       dispatch(setIsPromptDisabled(true));
       try {
         const response = await axios.post(
-          "http://34.64.163.60:3000/txt2img",
+          `${DIFFUSION_URL}`,
           { prompt },
           { responseType: "arraybuffer" }
         );
