@@ -3,7 +3,16 @@ export enum From {
   AI = "ai",
 }
 
-export type MessageType = { from: From; content: React.ReactNode };
+export enum ChatType {
+  TEXT = "text",
+  GENAIIMAGE = "genAiImage",
+}
+
+export type MessageType = {
+  type: ChatType;
+  from: From;
+  content: string;
+};
 
 export type OptionType = {
   title: string;

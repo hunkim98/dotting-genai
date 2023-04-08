@@ -4,7 +4,7 @@ export const getDataUri = async function (targetUrl: string): Promise<string> {
     xhr.onload = function () {
       var reader = new FileReader();
       reader.onloadend = function () {
-        console.log(reader.result);
+        // console.log(reader.result);
         resolve(reader.result as string);
       };
       reader.onerror = function (error) {

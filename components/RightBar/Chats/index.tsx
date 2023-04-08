@@ -1,17 +1,21 @@
 import React from "react";
 import Options from "../Options";
+import TextType from "./TextType";
+import { Flex } from "@chakra-ui/react";
 import Loading from "@/components/Loading";
+
 import { useAppSelector } from "@/lib/hooks";
-import { Avatar, Flex } from "@chakra-ui/react";
+import GenAiImageType from "./GenAiImageType";
+import { ChatType } from "@/types/aiAssistant";
 import { AlwaysScrollToBottom } from "@/utils/dom/scroll";
 
 //reference: https://ordinarycoders.com/blog/article/react-chakra-ui
 const Chats = () => {
+  const { isReceiving } = useAppSelector((state) => state.genAi);
   const { messages, options, isOptionsVisible } = useAppSelector(
     (state) => state.aiAssistant
   );
-  const { isReceiving } = useAppSelector((state) => state.genAi);
-  console.log('문제의 메시지', messages);
+
   return (
     <Flex
       w="100%"
@@ -36,45 +40,20 @@ const Chats = () => {
       }}
     >
       {messages?.map((item, index) => {
-          if (item.from === "user") {
-            return (
-              <Flex key={index} w="100%" justify="flex-end">
-                <Flex
-                  bg="#309695"
-                  color="white"
-                  minW="100px"
-                  maxW="250px"
-                  mb="4"
-                  px="4"
-                  py="2.5"
-                  fontSize="14"
-                  borderRadius="16"
-                >
-                  {item.content}
-                </Flex>
-              </Flex>
-            );
-          } else {
-            return (
-              <Flex key={index} w="100%">
-                <Avatar name="D" bg="#309695" size="sm" mr="2"></Avatar>
-                <Flex
-                  bg="white"
-                  color="#313033"
-                  minW="100px"
-                  maxW="250px"
-                  mb="4"
-                  px="4"
-                  py="2.5"
-                  fontSize="14"
-                  borderRadius="16"
-                >
-                  {item.content}
-                </Flex>
-              </Flex>
-            );
-          }
-        })}
+        if (item.type === ChatType.TEXT) {
+          return (
+            <TextType key={index} from={item.from} content={item.content} />
+          );
+        } else {
+          return (
+            <GenAiImageType
+              key={index}
+              from={item.from}
+              imgUrl={item.content}
+            />
+          );
+        }
+      })}
       {isReceiving && <Loading />}
       {isOptionsVisible && <Options options={options} />}
       <AlwaysScrollToBottom />

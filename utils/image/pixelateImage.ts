@@ -9,7 +9,6 @@ export async function pixelateImage(
   imageUrl: string,
   pixelationFactor: number
 ): Promise<{ imgUrl: string; data: DottingData }> {
-  console.log('픽셀 내부', imageUrl);
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d")!;
   return new Promise((resolve, reject) => {
