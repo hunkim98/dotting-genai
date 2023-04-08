@@ -1,15 +1,14 @@
-import { ForwardedRef, forwardRef, useRef } from "react";
+import { ForwardedRef, forwardRef } from "react";
 import { Button, Flex, Input } from "@chakra-ui/react";
 import { OptionType } from "@/types/aiAssistant";
 
 interface InputTypeProps {
   option: OptionType;
   isLastOption: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 function InputType(
-  { option, onChange, isLastOption }: InputTypeProps,
+  { option, isLastOption }: InputTypeProps,
   ref: ForwardedRef<HTMLInputElement | null>
 ) {
   const { title, action } = option;
@@ -21,23 +20,22 @@ function InputType(
         type="file"
         id="uploadImg"
         accept="image/*"
-        onChange={onChange}
+        onChange={action}
         display="none"
       />
-      <label htmlFor="uploadImg" style={{ cursor: "pointer" }}>
-        <Button
-          px="5"
-          my="2.5"
-          size="md"
-          height="8"
-          fontSize="12"
-          borderRadius="20"
-          onClick={action}
-          colorScheme="teal"
-        >
+      <Button
+        px="5"
+        my="2.5"
+        size="md"
+        height="8"
+        fontSize="12"
+        borderRadius="20"
+        colorScheme="teal"
+      >
+        <label htmlFor="uploadImg" style={{ cursor: "pointer" }}>
           {title}
-        </Button>
-      </label>
+        </label>
+      </Button>
 
       {!isLastOption && (
         <hr

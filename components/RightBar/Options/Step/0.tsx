@@ -1,36 +1,75 @@
+import { useCallback, useRef } from "react";
 import InputType from "../Type/InputType";
 import ButtonType from "../Type/ButtonType";
-import { setStep, setUploadedImgFile } from "@/lib/modules/aiAssistant";
+import {
+  setStep,
+  addMessages,
+  setIsOptionsVisible,
+  setUploadedImgUrls,
+} from "@/lib/modules/aiAssistant";
+import { setIsReceiving } from "@/lib/modules/genAi";
+import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch } from "@/lib/hooks";
-import { useCallback, useRef } from "react";
 
-const SelectCreatingAssetMode = () => {
+// DESC: step 0 - Create me an asset, Create me a background
+const Step0 = () => {
   const dispatch = useAppDispatch();
   const imgRef = useRef<HTMLInputElement | null>(null);
 
-  // step 1-1 (Create me an asset)
+  // DESC: step 0 (first option) Create me an asset
   const createAsset = useCallback(() => {
     dispatch(setStep(1));
   }, [dispatch]);
 
-  // step 1-2
-  const createBackground = useCallback(() => {}, []);
+  // DESC: step 0 (second option) Create me a background
+  const createBackground = useCallback(async () => {
+    // DESC: for loading, cannot select next option
+    dispatch(setIsReceiving(true));
+    dispatch(setIsOptionsVisible(false));
 
-  const onChangeImg = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (imgRef && imgRef.current && imgRef.current.files) {
-        const maxSize = 5 * 1024 * 1024;
+    if (imgRef && imgRef.current && imgRef.current.files) {
+      const maxSize = 5 * 1024 * 1024;
 
-        if (imgRef.current.files[0].size >= maxSize) {
-          alert(`Only images smaller than ${maxSize}(MB) can be registered.`);
-          return;
-        }
-
-        dispatch(setUploadedImgFile(imgRef.current.files[0]));
+      if (imgRef.current.files[0].size >= maxSize) {
+        alert(`Only images smaller than ${maxSize}(MB) can be registered.`);
+        return;
       }
-    },
-    [dispatch]
-  );
+
+      const file = imgRef.current.files[0];
+      const imgUrl = URL.createObjectURL(file);
+      const tempImgUrls: Array<string> = [];
+      tempImgUrls.push(imgUrl);
+      dispatch(setUploadedImgUrls(tempImgUrls));
+
+      try {
+        dispatch(
+          addMessages([
+            {
+              type: ChatType.TEXT,
+              from: From.AI,
+              content: `Requested images have been generated. 
+              Use the below sliders to control the pixel grids. 
+              Click the image if you would like to use it on your canvas.`,
+            },
+            ...tempImgUrls.map((url) => {
+              return {
+                type: ChatType.GENAIIMAGE,
+                from: From.AI,
+                content: url,
+              };
+            }),
+          ])
+        );
+      } catch (error) {
+        console.error(error);
+      }
+
+      // DESC: change step, loading=false, can select next option
+      dispatch(setStep(3));
+      dispatch(setIsReceiving(false));
+      dispatch(setIsOptionsVisible(true));
+    }
+  }, [dispatch]);
 
   return (
     <>
@@ -41,10 +80,9 @@ const SelectCreatingAssetMode = () => {
         isLastOption
         ref={imgRef}
         option={{ title: "Create me a background", action: createBackground }}
-        onChange={onChangeImg}
       />
     </>
   );
 };
 
-export default SelectCreatingAssetMode;
+export default Step0;

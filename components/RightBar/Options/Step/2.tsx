@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import axios from "axios";
 
-import ButtonType from "../Type/ButtonType";
 import {
   setStep,
   setPrompt,
@@ -9,16 +8,23 @@ import {
   setIsOptionsVisible,
   setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
+import ButtonType from "../Type/ButtonType";
 import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 
-const SelectWhatsNextUp = () => {
+// DESC: Regenerate, ask for other options
+const Step2 = () => {
   const dispatch = useAppDispatch();
   const { prompt } = useAppSelector((state) => state.aiAssistant);
 
-  // step 2-1
+  // step 2 (first step) Regenerate
   const regenerate = useCallback(async () => {
+    // DESC: for loading, cannot select next option
+    dispatch(setIsReceiving(true));
+    dispatch(setIsPromptDisabled(true));
+    dispatch(setIsOptionsVisible(false));
+
     dispatch(
       addMessages([
         {
@@ -29,9 +35,6 @@ const SelectWhatsNextUp = () => {
       ])
     );
 
-    dispatch(setIsReceiving(true));
-    dispatch(setIsPromptDisabled(true));
-    dispatch(setIsOptionsVisible(false));
     try {
       const response = await axios.post(
         "http://34.64.163.60:3000/txt2img",
@@ -67,6 +70,8 @@ const SelectWhatsNextUp = () => {
       console.error(error);
       alert("Error has happened while generating image data");
     }
+
+    // DESC: for changing step, loading, can select next option
     dispatch(setStep(2));
     dispatch(setIsReceiving(false));
     dispatch(setIsOptionsVisible(true));
@@ -94,4 +99,4 @@ const SelectWhatsNextUp = () => {
   );
 };
 
-export default SelectWhatsNextUp;
+export default Step2;

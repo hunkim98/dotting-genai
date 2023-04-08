@@ -8,13 +8,13 @@ export type AiAssistantState = {
   messages: MessageType[];
   isPromptDisabled: boolean;
   isOptionsVisible: boolean;
-  uploadedImgFile: string | Blob;
+  uploadedImgUrls: string[] | Blob[];
 };
 
 export const InitialState: AiAssistantState = {
   step: 0,
   prompt: "",
-  uploadedImgFile: "",
+  uploadedImgUrls: [],
   isRightBar: false,
   isOptionsVisible: true,
   isPromptDisabled: true,
@@ -46,8 +46,8 @@ export const aiAssistantModule = createSlice({
     setIsOptionsVisible: (state, action) => {
       state.isOptionsVisible = action.payload;
     },
-    setUploadedImgFile: (state, action) => {
-      state.uploadedImgFile = action.payload;
+    setUploadedImgUrls: (state, action) => {
+      state.uploadedImgUrls = action.payload;
     },
   },
 });
@@ -58,7 +58,7 @@ export const {
   setMessages,
   addMessages,
   setIsRightBar,
-  setUploadedImgFile,
+  setUploadedImgUrls,
   setIsOptionsVisible,
   setIsPromptDisabled,
 } = aiAssistantModule.actions;
