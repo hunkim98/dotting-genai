@@ -18,7 +18,7 @@ const GenAiImageType = ({ from, imgUrl }: { from: From; imgUrl: string }) => {
           fontSize="14"
           borderRadius="16"
         >
-          <GenAiImage rawImageUrl={imgUrl} initPixelationDegree={10} />
+          <GenAiImage rawImageUrl={imgUrl} initPixelationDegree={6} />
         </Flex>
       </Flex>
     );
@@ -37,7 +37,7 @@ const GenAiImageType = ({ from, imgUrl }: { from: From; imgUrl: string }) => {
           fontSize="14"
           borderRadius="16"
         >
-          <GenAiImage rawImageUrl={imgUrl} initPixelationDegree={10} />
+          <GenAiImage rawImageUrl={imgUrl} initPixelationDegree={6} />
         </Flex>
       </Flex>
     );

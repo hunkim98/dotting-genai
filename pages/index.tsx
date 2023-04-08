@@ -80,8 +80,8 @@ export default function Home() {
                 return;
               }
               tempIndicators.push({
-                rowIndex: rowKey + rowIndex - widthOffset,
-                columnIndex: columnKey + columnIndex - heightOffset,
+                rowIndex: rowKey + rowIndex - heightOffset,
+                columnIndex: columnKey + columnIndex - widthOffset,
                 color: pixel.color,
               });
             });
@@ -116,20 +116,25 @@ export default function Home() {
         const widthOffset = Math.floor(selectedDottingData.width / 2);
         const heightOffset = Math.floor(selectedDottingData.height / 2);
         const { rowIndex, columnIndex } = hoveredPixel.current;
-        selectedDottingData.data.forEach((dottingData, dataRowIndex) => {
-          dottingData.forEach((dottingData, dataColumnIndex) => {
-            if (dottingData === null) {
-              return;
-            }
-            tempIndicators.push({
-              rowIndex: dataRowIndex + rowIndex - widthOffset,
-              columnIndex: dataColumnIndex + columnIndex - heightOffset,
-              color: dottingData.color,
+        Array.from(selectedDottingData.data.entries()).forEach(
+          (columnsData) => {
+            const [rowKey, columns] = columnsData;
+            Array.from(columns.entries()).forEach((column) => {
+              const [columnKey, pixel] = column;
+              if (!pixel.color) {
+                return;
+              }
+              tempIndicators.push({
+                rowIndex: rowKey + rowIndex - heightOffset,
+                columnIndex: columnKey + columnIndex - widthOffset,
+                color: pixel.color,
+              });
             });
-          });
-        });
+          }
+        );
         colorPixels(tempIndicators);
         setSelectedDottingData(null);
+        setIndicatorPixels([]);
       }
     };
     addCanvasElementEventListener("mousedown", colorIndicators);

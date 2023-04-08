@@ -45,14 +45,10 @@ export async function pixelateImage(
         const pixelSkipAmount = Math.floor(
           Math.max(originalWidth, originalHeight) / maxPixelEdgeCount
         );
-        let validRowCount = 0;
-        let validColumnCount = 0;
         if (pixelationFactor !== 0) {
           for (let y = 0; y < originalHeight; y += pixelSkipAmount) {
             rowIndex++;
             pixelData.set(rowIndex, new Map());
-            let isCurrentColumnValid = false;
-            let currentRowCount = 0;
             for (let x = 0; x < originalWidth; x += pixelSkipAmount) {
               // extracting the position of the sample pixel
               const pixelIndexPosition = (x + y * originalWidth) * 4;
@@ -63,21 +59,14 @@ export async function pixelateImage(
               const alpha = originalImageData[pixelIndexPosition + 3];
               let color = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
               if (alpha !== 0) {
-                isCurrentColumnValid = true;
-                currentRowCount++;
                 context.fillStyle = color;
                 context.fillRect(x, y, pixelSkipAmount, pixelSkipAmount);
                 pixelData.get(rowIndex)!.set(columnIndex, { color });
               }
 
-              if (currentRowCount > validRowCount) {
-                validRowCount = currentRowCount;
-              }
               columnIndex++;
             }
-            if (isCurrentColumnValid) {
-              validColumnCount++;
-            }
+
             columnIndex = 0;
           }
         }
