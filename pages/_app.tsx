@@ -3,7 +3,6 @@ import type { AppProps } from "next/app";
 import { wrapper } from "@/lib/store";
 import { Provider } from "react-redux";
 import { ChakraProvider } from "@chakra-ui/react";
-import ChatContextProvier from "@/context/ChatContext";
 import GenAiDataContextProvier from "@/context/GenAiDataContext";
 
 export function App({ Component, ...rest }: AppProps) {
@@ -11,11 +10,9 @@ export function App({ Component, ...rest }: AppProps) {
   return (
     <Provider store={store}>
       <ChakraProvider>
-        <ChatContextProvier>
-          <GenAiDataContextProvier>
-            <Component {...props.pageProps} />
-          </GenAiDataContextProvier>
-        </ChatContextProvier>
+        <GenAiDataContextProvier>
+          <Component {...props.pageProps} />
+        </GenAiDataContextProvier>
       </ChakraProvider>
     </Provider>
   );

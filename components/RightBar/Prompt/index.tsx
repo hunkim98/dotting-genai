@@ -1,29 +1,22 @@
-import { useCallback } from "react";
 import Image from "next/image";
 import send from "@/public/send-filled.svg";
+import { useAppSelector } from "@/lib/hooks";
 import { Flex, Input } from "@chakra-ui/react";
-import { useChatContext } from "@/context/ChatContext";
 
-const Prompt = () => {
-  const { keyword, setKeyword } = useChatContext();
+interface PromptProps {
+  prompt: string;
+  setPrompt: React.Dispatch<React.SetStateAction<string>>;
+  onSubmit: (e: React.FormEvent<HTMLElement>) => void;
+}
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLElement>) => {
-      e.preventDefault();
-      if (!keyword.trim()) {
-        setKeyword("");
-        return;
-      }
-      // TODO: to get image
-      setKeyword("");
-    },
-    [keyword, setKeyword]
-  );
-  
+const Prompt = ({ prompt, setPrompt, onSubmit }: PromptProps) => {
+  const { isPromptDisabled } = useAppSelector((state) => state.aiAssistant);
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <Flex bg="#E9E9E9" minH="72px" w="100%" px="4" pt="3" pb="5">
         <Input
+          disabled={isPromptDisabled}
           autoFocus
           placeholder="Type a Message"
           mr="2"
@@ -33,10 +26,10 @@ const Prompt = () => {
           _focusVisible={{
             outline: "none",
           }}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
         />
-        <button type="submit" onClick={(e) => handleSubmit(e)}>
+        <button type="submit" onClick={onSubmit} disabled={isPromptDisabled}>
           <Image src={send} width={24} height={24} alt="send" />
         </button>
       </Flex>

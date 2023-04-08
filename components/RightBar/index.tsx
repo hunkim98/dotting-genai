@@ -1,12 +1,21 @@
 import React from "react";
+
 import Chats from "./Chats";
 import Prompt from "./Prompt";
 import { CloseIcon } from "@chakra-ui/icons";
 import { Flex, Heading } from "@chakra-ui/react";
-import { useChatContext } from "@/context/ChatContext";
 
-export const RightBar = () => {
-  const { setIsRightBar } = useChatContext();
+import { useAppDispatch } from "@/lib/hooks";
+import { setIsRightBar } from "@/lib/modules/aiAssistant";
+
+interface RightBarProps {
+  prompt: string;
+  setPrompt: React.Dispatch<React.SetStateAction<string>>;
+  onSubmit: (e: React.FormEvent<HTMLElement>) => void;
+}
+
+export const RightBar = ({ prompt, setPrompt, onSubmit }: RightBarProps) => {
+  const dispatch = useAppDispatch();
 
   return (
     <Flex
@@ -30,14 +39,14 @@ export const RightBar = () => {
           <Heading as="h5" size="sm" w="180px">
             Dotting AI Assistant
           </Heading>
-          <button onClick={() => setIsRightBar(false)}>
+          <button onClick={() => dispatch(setIsRightBar(false))}>
             <CloseIcon boxSize={3.5} />
           </button>
         </Flex>
 
         <Chats />
 
-        <Prompt />
+        <Prompt prompt={prompt} setPrompt={setPrompt} onSubmit={onSubmit} />
       </Flex>
     </Flex>
   );

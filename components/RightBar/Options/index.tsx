@@ -1,16 +1,14 @@
+import { OptionType } from "@/types/aiAssistant";
 import { Button, Flex } from "@chakra-ui/react";
 
 interface OptionsProps {
-  options: {
-    title: string;
-    action: () => void; // TODO: modify function type
-  }[];
+  options: OptionType[];
 }
 
 const Options = ({ options }: OptionsProps) => {
   return (
     <>
-      {options.map(({ title, action }, index) => {
+      {options?.map(({ title, action }, index) => {
         return (
           <Flex key={index} direction="column">
             <Button
@@ -25,7 +23,7 @@ const Options = ({ options }: OptionsProps) => {
             >
               {title}
             </Button>
-            {index === options.length - 1 ? (
+            {index === options?.length - 1 ? (
               <></>
             ) : (
               <hr

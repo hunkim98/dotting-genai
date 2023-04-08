@@ -1,10 +1,10 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-
 import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
-
+import styles from "@/styles/Home.module.css";
+import { Button, Center, Img, Input } from "@chakra-ui/react";
 import {
   Dotting,
   DottingRef,
@@ -14,28 +14,39 @@ import {
   PixelModifyItem,
   CanvasHoverPixelChangeHandler,
 } from "dotting";
-
-import styles from "@/styles/Home.module.css";
-import { Button, Center, Input } from "@chakra-ui/react";
-import RightBarContainer from "@/components/RightBarContainer";
-
+import RightBar from "@/components/RightBar";
+import GenAiImage from "@/components/RightBar/GenAiImage";
+import {
+  setStep,
+  setOptions,
+  setMessages,
+  setIsRightBar,
+  setIsOptionsVisible,
+  setIsPromptDisabled,
+} from "@/lib/modules/aiAssistant";
+import { From, MessageType } from "@/types/aiAssistant";
+import { getMessages } from "@/utils/aiAssistant";
 import { getDataUri } from "@/utils/image/getDataUri";
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-
-import { useChatContext } from "@/context/ChatContext";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
   const [prompt, setPrompt] = useState<string>("");
-  const { isRightBar, setIsRightBar } = useChatContext();
-  const { selectedDottingData, setSelectedDottingData } =
-    useContext(GenAiDataContext);
-  const isReceiving = useAppSelector((state) => state.genAi.isReceiving);
+  const [uploadedImgFile, setUploadedImgFile] = useState<string | Blob>("");
 
   const dispatch = useAppDispatch();
+  const generatedImgUrls = useAppSelector(
+    (state) => state.genAi.generatedImgUrls
+  );
+  const { step, isRightBar, messages } = useAppSelector(
+    (state) => state.aiAssistant
+  );
+  const { selectedDottingData, setSelectedDottingData } =
+    useContext(GenAiDataContext);
+
   const {
     addHoverPixelChangeListener,
     removeHoverPixelChangeListener,
@@ -152,36 +163,144 @@ export default function Home() {
     handleHoverPixelChangeHandler,
   ]);
 
-  const callImage = useCallback(async () => {
-    dispatch(setIsReceiving(true));
-    try {
-      const response = await axios.post("api/openai/dalle", {
-        queryPrompt: prompt,
-      });
-      const buffers = response.data.buffers;
-      const tempImgUrls: Array<string> = [];
-      for (const buffer of buffers) {
-        const view = new Uint8Array(buffer);
-        const blob = new Blob([view], { type: "image/png" });
-        const url = URL.createObjectURL(blob);
-        tempImgUrls.push(url);
+  /* 
+    🖍 ABOUT RightBar
+  */
+  const callImage = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      if (!prompt.trim()) {
+        setPrompt("");
+        return;
       }
-      dispatch(setGeneratedImgUrls(tempImgUrls));
-      dispatch(setIsReceiving(false));
-    } catch (error) {
-      console.error(error);
-      alert("Error has happened while generating image data");
-      dispatch(setIsReceiving(false));
-    }
-  }, [dispatch, prompt]);
+      setPrompt("");
+      dispatch(setIsPromptDisabled(true));
 
-  const enhancePrompt = useCallback(async () => {
-    if (!prompt) {
-      alert("Please enter a prompt");
-      return;
+      dispatch(
+        setMessages(
+          getMessages(messages, [
+            [From.USER, prompt],
+            [From.AI, "Generating image... Please wait a few seconds."],
+          ])
+        )
+      );
+
+      dispatch(setIsReceiving(true));
+      try {
+        const response = await axios.post("http://34.64.163.60:3000/txt2img", {
+          prompt,
+        });
+        const imgB = response.data;
+        const tempImgUrls: Array<string> = [imgB];
+        console.log(tempImgUrls);
+        dispatch(setGeneratedImgUrls(tempImgUrls));
+        dispatch(
+          setMessages(
+            getMessages(
+              messages,
+              tempImgUrls.map((url) => {
+                return [
+                  From.AI,
+                  <GenAiImage
+                    key={url}
+                    rawImageUrl={url}
+                    initPixelationDegree={10}
+                  />,
+                ];
+              })
+            )
+          )
+        );
+      } catch (error) {
+        console.error(error);
+        alert("Error has happened while generating image data");
+      }
+      dispatch(setIsReceiving(false));
+    },
+    [dispatch, prompt, generatedImgUrls, setMessages]
+  );
+
+  const createAsset = useCallback(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
+
+  const createBackground = useCallback(() => {
+    console.log("설정!");
+  }, []);
+
+  const generateAIWithPrompt = useCallback(() => {
+    dispatch(setStep(2));
+    dispatch(setIsPromptDisabled(false));
+    dispatch(setIsOptionsVisible(false));
+  }, [dispatch]);
+
+  const uploadLocalImageFile = useCallback(() => {}, []);
+
+  const regenerate = useCallback(() => {
+    callImage();
+  }, [callImage]);
+
+  useEffect(() => {
+    if (step === 0) {
+      dispatch(
+        setMessages(
+          getMessages(messages, [
+            [From.AI, "Hello this is Dotting Ai, how may I help you?"],
+          ])
+        )
+      );
+      dispatch(
+        setOptions([
+          {
+            title: "Create me an asset",
+            action: createAsset,
+          },
+          {
+            title: "Create me a background",
+            action: createBackground,
+          },
+        ])
+      );
+    } else if (step === 1) {
+      dispatch(
+        setMessages(
+          getMessages(messages, [
+            [From.AI, "How would you like to create an asset?"],
+          ])
+        )
+      );
+      dispatch(
+        setOptions([
+          {
+            title: "Generate asset AI with prompt",
+            action: generateAIWithPrompt,
+          },
+          {
+            title: "Upload local image file",
+            action: uploadLocalImageFile,
+          },
+        ])
+      );
+    } else if (step === 2) {
+      dispatch(
+        setMessages(
+          getMessages(messages, [[From.AI, "Please input your prompt."]])
+        )
+      );
+      dispatch(
+        setOptions([
+          {
+            title: "Regenerate",
+            action: regenerate,
+          },
+          {
+            title: "Upload local image file",
+            action: () => setStep(0),
+          },
+        ])
+      );
     }
-    setPrompt("cartoon-style " + prompt + " with white background");
-  }, [prompt, setPrompt]);
+  }, [dispatch, step]);
 
   return (
     <>
@@ -192,7 +311,6 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main style={{ display: "flex", width: "100vw" }}>
-        {isReceiving && <div>Receiving</div>}
         <div
           style={{
             width: "100%",
@@ -219,49 +337,56 @@ export default function Home() {
                   });
               })}
           />
+          {/* {generatedImgUrls.length > 0 && (
+            <GenAiImage
+              key={generatedImgUrls[0]}
+              rawImageUrl={generatedImgUrls[0]}
+              initPixelationDegree={10}
+            />
+          )} */}
           {isRightBar ? (
-            <RightBarContainer />
+            <RightBar
+              prompt={prompt}
+              onSubmit={callImage}
+              setPrompt={setPrompt}
+            />
           ) : (
             <Button
               borderRadius="16"
-              onClick={() => setIsRightBar(true)}
+              onClick={() => dispatch(setIsRightBar(true))}
               style={{ position: "absolute", right: "20px", top: "24px" }}
-              // colorScheme="linear-gradient(91.59deg, #309695 17.75%, rgba(238, 238, 238) 172.19%);"
               colorScheme="teal"
             >
               Open Dotting Ai Assistant
             </Button>
           )}
         </div>
-
-        {/* <Center
-          style={{
-            alignSelf: "center",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Input
-            value={prompt}
-            style={{ fontSize: 20, margin: 5, padding: 10 }}
-            onChange={(e) => {
-              setPrompt(e.target.value);
-            }}
-          />
-          <Button
-            style={{
-              // padding: 10,
-              margin: 5,
-            }}
-            onClick={enhancePrompt}
-          >
-            Enhance prompt
-          </Button>
-          <Button colorScheme="teal" style={{ margin: 5 }} onClick={callImage}>
-            Generate images
-          </Button>
-        </Center> */}
       </main>
     </>
   );
+}
+
+{
+  /* <div
+        style={{
+          position: "relative",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "10px 0",
+        }}
+      >
+        <Grid gap={6}>
+          {generatedImgUrls.map((url, index) => {
+            return (
+              <GenAiImage
+                key={url}
+                rawImageUrl={url}
+                initPixelationDegree={10}
+              />
+            );
+          })}
+        </Grid>
+      </div> */
 }

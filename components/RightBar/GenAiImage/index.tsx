@@ -84,7 +84,7 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
       >
         <SliderTrack bg="red.100">
           <Box position="relative" right={10} />
-          <SliderFilledTrack bg="tomato" />
+          <SliderFilledTrack bg="teal" />
         </SliderTrack>
         <SliderThumb boxSize={6} />
       </Slider>
