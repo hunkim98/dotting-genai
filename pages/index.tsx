@@ -17,7 +17,7 @@ import {
   setPrompt,
   setMessages,
   addMessages,
-  setIsRightBar,
+  setIsRightBarOpen,
   setIsOptionsVisible,
   setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
@@ -31,9 +31,12 @@ export default function Home() {
   const ref = useRef<DottingRef>(null);
 
   const dispatch = useAppDispatch();
-  const { prompt, step, isRightBar, messages } = useAppSelector(
-    (state) => state.aiAssistant
-  );
+  const {
+    prompt,
+    step,
+    isRightBarOpen: isRightBar,
+    messages,
+  } = useAppSelector((state) => state.aiAssistant);
   const { selectedDottingData, setSelectedDottingData } =
     useContext(GenAiDataContext);
 
@@ -128,6 +131,7 @@ export default function Home() {
           });
         });
         colorPixels(tempIndicators);
+        setSelectedDottingData(null);
       }
     };
     addCanvasElementEventListener("mousedown", colorIndicators);
@@ -137,6 +141,7 @@ export default function Home() {
   }, [
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
+    setSelectedDottingData,
     hoveredPixel,
     colorPixels,
     selectedDottingData,
@@ -303,7 +308,7 @@ export default function Home() {
           ) : (
             <Button
               borderRadius="16"
-              onClick={() => dispatch(setIsRightBar(true))}
+              onClick={() => dispatch(setIsRightBarOpen(true))}
               style={{ position: "absolute", right: "20px", top: "24px" }}
               colorScheme="teal"
             >

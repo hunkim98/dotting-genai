@@ -6,7 +6,7 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { Flex, Heading } from "@chakra-ui/react";
 
 import { useAppDispatch } from "@/lib/hooks";
-import { setIsRightBar } from "@/lib/modules/aiAssistant";
+import { setIsRightBarOpen } from "@/lib/modules/aiAssistant";
 
 interface RightBarProps {
   onSubmit: (e: React.FormEvent<HTMLElement>) => void;
@@ -37,7 +37,7 @@ export const RightBar = ({ onSubmit }: RightBarProps) => {
           <Heading as="h5" size="sm" w="180px">
             Dotting AI Assistant
           </Heading>
-          <button onClick={() => dispatch(setIsRightBar(false))}>
+          <button onClick={() => dispatch(setIsRightBarOpen(false))}>
             <CloseIcon boxSize={3.5} />
           </button>
         </Flex>
