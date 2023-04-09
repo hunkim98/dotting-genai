@@ -65,9 +65,7 @@ const Step1 = () => {
             {
               type: ChatType.TEXT,
               from: From.AI,
-              content: `Requested images have been generated. 
-              Use the below sliders to control the pixel grids. 
-              Click the image if you would like to use it on your canvas.`,
+              content: `Your submitted image has been processed and the background has been removed. Please select the image to use it`,
             },
             ...tempImgUrls.map((url) => {
               return {

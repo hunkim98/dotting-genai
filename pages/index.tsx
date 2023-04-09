@@ -140,9 +140,13 @@ export default function Home() {
           }
         );
         colorPixels(tempIndicators);
+
         setSelectedDottingData(null);
         setIndicatorPixels([]);
       }
+      // this is here since coloring a pixel will trigger a mousedown event
+      event.stopImmediatePropagation();
+      event.stopPropagation();
     };
     addCanvasElementEventListener("mousedown", colorIndicators);
     return () => {
@@ -273,7 +277,7 @@ export default function Home() {
           {
             type: ChatType.TEXT,
             From: From.AI,
-            content: "How would you like to create an asset?",
+            content: "How would you like to create your character?",
           },
         ])
       );

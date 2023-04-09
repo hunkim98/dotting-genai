@@ -31,7 +31,7 @@ const Step2 = () => {
         {
           type: ChatType.TEXT,
           from: From.AI,
-          content: "Regenerating image... Please wait a few seconds.",
+          content: "Regenerating images... Please wait a few seconds.",
         },
       ])
     );
@@ -67,7 +67,7 @@ const Step2 = () => {
           {
             type: ChatType.TEXT,
             from: From.AI,
-            content: `‘${prompt}’ images have been generated. Use the below sliders to control the pixel grids. Click the image if you would like to use it on your canvas.`,
+            content: `Your images have been regenerated. Please select the image you want to use.`,
           },
           ...tempImgUrls.map((url) => {
             return {
