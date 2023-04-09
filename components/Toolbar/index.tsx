@@ -62,7 +62,6 @@ interface ToolbarProps {
   setIsGridVisible: (v: boolean) => void;
   setGridStrokeColor: (v: string) => void;
   setGridStrokeWidth: (v: number) => void;
-  ref: RefObject<DottingRef | null>;
 }
 // ForwardedRef<DottingRef | null>
 
@@ -79,7 +78,7 @@ const Toolbar = forwardRef(function ToolBarInner(
     setGridStrokeWidth,
     setGridStrokeColor,
   }: ToolbarProps,
-  ref: ForwardedRef<DottingRef | null>
+  ref: ForwardedRef<DottingRef | null>)
 ) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -106,7 +105,7 @@ const Toolbar = forwardRef(function ToolBarInner(
     [setIsGridVisible]
   );
 
-  const handleIsPanZoomableChange = useCallBack((e: { target: { checked: boolean } }) => {
+  const handleIsPanZoomableChange = useCallBack((e: { target: { checked: boolean } })) => {
     setIsPanZoomable(e.target.checked);
   }, [setIsPanZoomable]);
 
