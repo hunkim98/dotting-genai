@@ -38,36 +38,37 @@ const Step2 = () => {
 
     try {
       // we will call diffusion api two times to get two images
-      // const responses = await Promise.all([
-      //   axios.post(
-      //     `${DIFFUSION_URL}`,
-      //     { prompt },
-      //     { responseType: "arraybuffer" }
-      //   ),
-      //   axios.post(
-      //     `${DIFFUSION_URL}`,
-      //     { prompt },
-      //     { responseType: "arraybuffer" }
-      //   ),
-      // ]);
-      const response = await axios.post("/api/diffusion", { prompt });
-      const buffers = response.data.buffers;
+      const responses = await Promise.all([
+        axios.post(
+          `${DIFFUSION_URL}`,
+          { prompt },
+          { responseType: "arraybuffer" }
+        ),
+        axios.post(
+          `${DIFFUSION_URL}`,
+          { prompt },
+          { responseType: "arraybuffer" }
+        ),
+      ]);
       const tempImgUrls: Array<string> = [];
-      for (const buffer of buffers) {
-        const bufferData = new Uint8Array(buffer);
-        const blob = new Blob([bufferData], { type: "image/png" });
-        const url = URL.createObjectURL(blob);
-        tempImgUrls.push(url);
-      }
-      // for (const response of responses) {
-      //   const img = response.data;
-      //   const buffer = Buffer.from(img, "utf-8");
-      //   const bufferData = buffer.toJSON().data;
-      //   const view = new Uint8Array(bufferData);
-      //   const blob = new Blob([view], { type: "image/png" });
+      // const response = await axios.post("/api/diffusion", { prompt });
+      // const buffers = response.data.buffers;
+      // const tempImgUrls: Array<string> = [];
+      // for (const buffer of buffers) {
+      //   const bufferData = new Uint8Array(buffer);
+      //   const blob = new Blob([bufferData], { type: "image/png" });
       //   const url = URL.createObjectURL(blob);
       //   tempImgUrls.push(url);
       // }
+      for (const response of responses) {
+        const img = response.data;
+        const buffer = Buffer.from(img, "utf-8");
+        const bufferData = buffer.toJSON().data;
+        const view = new Uint8Array(bufferData);
+        const blob = new Blob([view], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+        tempImgUrls.push(url);
+      }
       dispatch(setGeneratedImgUrls(tempImgUrls));
 
       dispatch(
