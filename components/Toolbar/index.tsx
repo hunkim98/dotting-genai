@@ -1,4 +1,13 @@
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  ForwardedRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  MutableRefObject,
+  RefObject,
+} from "react";
 import { DottingRef, useBrush, useDotting } from "dotting";
 import Image from "next/image";
 
@@ -46,17 +55,18 @@ interface ToolbarProps {
   isGridFixed: boolean;
   isPanZoomable: boolean;
   isGridVisible: boolean;
-  gridStrokeColor: number;
+  gridStrokeColor: string;
   gridStrokeWidth: number;
   setIsGridFixed: (v: boolean) => void;
   setIsPanZoomable: (v: boolean) => void;
   setIsGridVisible: (v: boolean) => void;
-  setGridStrokeColor: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  setGridStrokeWidth: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setGridStrokeColor: (v: string) => void;
+  setGridStrokeWidth: (v: number) => void;
+  ref: RefObject<DottingRef | null>;
 }
 // ForwardedRef<DottingRef | null>
 
-const Toolbar = (
+const Toolbar = forwardRef(function ToolBarInner(
   {
     isGridFixed,
     isPanZoomable,
@@ -69,10 +79,10 @@ const Toolbar = (
     setGridStrokeWidth,
     setGridStrokeColor,
   }: ToolbarProps,
-  ref: DottingRef
-) => {
+  ref: ForwardedRef<DottingRef | null>
+) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const cancelRef = useRef();
+  const cancelRef = useRef<HTMLButtonElement>(null);
   const [isSelected, setIsSelected] = useState({
     dot: true,
     eraser: false,
@@ -89,17 +99,20 @@ const Toolbar = (
     [changeBrushColor]
   );
 
-  const handleIsGridVisibleChange = (e: { target: { checked: boolean } }) => {
-    setIsGridVisible(e.target.checked);
-  };
+  const handleIsGridVisibleChange = useCallback(
+    (e: { target: { checked: boolean } }) => {
+      setIsGridVisible(e.target.checked);
+    },
+    [setIsGridVisible]
+  );
 
-  const handleIsPanZoomableChange = (e: { target: { checked: boolean } }) => {
+  const handleIsPanZoomableChange = useCallBack((e: { target: { checked: boolean } }) => {
     setIsPanZoomable(e.target.checked);
-  };
+  }, [setIsPanZoomable]);
 
-  const handleIsGridFixedChange = (e: { target: { checked: boolean } }) => {
+  const handleIsGridFixedChange = useCallBack()e: { target: { checked: boolean } }) => {
     setIsGridFixed(e.target.checked);
-  };
+  }, [setIsGridFixed]);
 
   useEffect(() => {
     if (brushMode === BrushMode.DOT) {
@@ -268,7 +281,7 @@ const Toolbar = (
               max={10}
               step={1}
               value={gridStrokeWidth}
-              onChange={setGridStrokeWidth}
+              onChange={(e) => setGridStrokeWidth(Number(e.target.value))}
             />
           </Flex>
 
@@ -286,7 +299,7 @@ const Toolbar = (
             <input
               type="color"
               value={gridStrokeColor}
-              onChange={setGridStrokeColor}
+              onChange={(e) => setGridStrokeColor(e.target.value)}
             />
           </Flex>
 
@@ -389,6 +402,6 @@ const Toolbar = (
       </Menu>
     </Flex>
   );
-};
+});
 
-export default forwardRef<ToolbarProps, DottingRef>(Toolbar);
+export default Toolbar;

@@ -1,5 +1,5 @@
-import { forwardRef, useState } from "react";
-import { DottingRef, useDotting } from "dotting";
+import { useState } from "react";
+import { ImageDownloadOptions } from "dotting";
 
 import Image from "next/image";
 import logo from "@/public/logo.svg";
@@ -15,11 +15,13 @@ import {
 } from "@chakra-ui/react";
 import { DownloadIcon, HamburgerIcon } from "@chakra-ui/icons";
 
-interface HeaderProps {}
+interface HeaderProps {
+  downloadImage: (options?: ImageDownloadOptions | undefined) => void;
+  isGridVisible: boolean;
+}
 
-const Header = ({}: HeaderProps, ref: DottingRef) => {
+const Header = ({ downloadImage, isGridVisible }: HeaderProps) => {
   const [username] = useState("Guest");
-  const { downloadImage } = useDotting(ref);
 
   return (
     <>
@@ -72,7 +74,7 @@ const Header = ({}: HeaderProps, ref: DottingRef) => {
               py="0"
               mt="-1"
               borderRadius={10}
-              onClick={() => downloadImage()}
+              onClick={() => downloadImage({ isGridVisible })}
             >
               <MenuItem
                 pl="6"
@@ -94,4 +96,4 @@ const Header = ({}: HeaderProps, ref: DottingRef) => {
   );
 };
 
-export default forwardRef<HeaderProps, DottingRef>(Header);
+export default Header;

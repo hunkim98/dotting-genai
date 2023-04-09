@@ -50,7 +50,7 @@ export default function Home() {
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
   } = useHandlers(ref);
-  const { setIndicatorPixels, colorPixels } = useDotting(ref);
+  const { setIndicatorPixels, colorPixels, downloadImage } = useDotting(ref);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -323,7 +323,7 @@ export default function Home() {
               Open Dotting Ai Assistant
             </Button>
           )}
-          <Header ref={ref} />
+          <Header downloadImage={downloadImage} isGridVisible={isGridVisible} />
           <Toolbar
             ref={ref}
             isGridFixed={isGridFixed}
