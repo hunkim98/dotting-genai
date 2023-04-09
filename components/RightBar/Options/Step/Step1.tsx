@@ -93,7 +93,7 @@ const Step1 = () => {
     <>
       <ButtonType
         option={{
-          title: "Generate asset AI with prompt",
+          title: "Generate character with prompt",
           action: generateAIWithPrompt,
         }}
       />
@@ -101,7 +101,7 @@ const Step1 = () => {
         isLastOption
         ref={imgRef}
         option={{
-          title: "Upload local image file",
+          title: "Extract character from my image",
           action: uploadLocalImageFile,
         }}
       />

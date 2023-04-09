@@ -144,6 +144,7 @@ export default function Home() {
   }, [
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
+    setIndicatorPixels,
     setSelectedDottingData,
     hoveredPixel,
     colorPixels,
