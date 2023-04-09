@@ -295,6 +295,7 @@ export default function Home() {
             isGridFixed={isGridFixed}
             isPanZoomable={isPanZoomable}
             isGridVisible={isGridVisible}
+            style={{ border: "none" }}
             height={"100vh"}
             initData={Array(30)
               .fill("")
