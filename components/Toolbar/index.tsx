@@ -142,7 +142,7 @@ const Toolbar = forwardRef(function ToolBarInner(
   return (
     <Flex
       width="424px"
-      height="auto"
+      height="42px"
       position={"absolute"}
       style={{
         left: "50%",
