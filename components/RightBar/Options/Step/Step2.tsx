@@ -9,7 +9,7 @@ import {
   setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
 import ButtonType from "../Type/ButtonType";
-import { DIFFUSION_URL } from '@/constants/urls';
+import { DIFFUSION_URL } from "@/constants/urls";
 import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
@@ -37,18 +37,29 @@ const Step2 = () => {
     );
 
     try {
-      const response = await axios.post(
-        `${DIFFUSION_URL}`,
-        { prompt },
-        { responseType: "arraybuffer" }
-      );
-      const img = response.data;
-      const buffer = Buffer.from(img, "utf-8");
-      const bufferData = buffer.toJSON().data;
-      const view = new Uint8Array(bufferData);
-      const blob = new Blob([view], { type: "image/png" });
-      const url = URL.createObjectURL(blob);
-      const tempImgUrls: Array<string> = [url];
+      // we will call diffusion api two times to get two images
+      const responses = await Promise.all([
+        axios.post(
+          `${DIFFUSION_URL}`,
+          { prompt },
+          { responseType: "arraybuffer" }
+        ),
+        axios.post(
+          `${DIFFUSION_URL}`,
+          { prompt },
+          { responseType: "arraybuffer" }
+        ),
+      ]);
+      const tempImgUrls: Array<string> = [];
+      for (const response of responses) {
+        const img = response.data;
+        const buffer = Buffer.from(img, "utf-8");
+        const bufferData = buffer.toJSON().data;
+        const view = new Uint8Array(bufferData);
+        const blob = new Blob([view], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+        tempImgUrls.push(url);
+      }
       dispatch(setGeneratedImgUrls(tempImgUrls));
 
       dispatch(
