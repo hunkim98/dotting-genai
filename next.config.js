@@ -1,4 +1,4 @@
-const serverDestination = process.env.NEXT_PUBLIC_AI_URL + "/:path*";
+const serverDestination = process.env.NEXT_PUBLIC_REAL_AI_URL + "/:path*";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
