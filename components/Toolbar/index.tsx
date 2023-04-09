@@ -5,8 +5,6 @@ import {
   useEffect,
   useRef,
   useState,
-  MutableRefObject,
-  RefObject,
 } from "react";
 import { DottingRef, useBrush, useDotting } from "dotting";
 import Image from "next/image";
@@ -63,22 +61,21 @@ interface ToolbarProps {
   setGridStrokeColor: (v: string) => void;
   setGridStrokeWidth: (v: number) => void;
 }
-// ForwardedRef<DottingRef | null>
 
 const Toolbar = forwardRef(function ToolBarInner(
   {
     isGridFixed,
     isPanZoomable,
     isGridVisible,
-    gridStrokeWidth,
     gridStrokeColor,
+    gridStrokeWidth,
     setIsGridFixed,
     setIsPanZoomable,
     setIsGridVisible,
-    setGridStrokeWidth,
     setGridStrokeColor,
+    setGridStrokeWidth,
   }: ToolbarProps,
-  ref: ForwardedRef<DottingRef | null>)
+  ref: ForwardedRef<DottingRef>
 ) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -87,15 +84,17 @@ const Toolbar = forwardRef(function ToolBarInner(
     eraser: false,
     paint_bucket: false,
   });
+  //@ts-ignore
   const { undo, redo, clear } = useDotting(ref);
   const { changeBrushColor, changeBrushMode, brushMode, brushColor } =
+    //@ts-ignore
     useBrush(ref);
 
   const handleColorChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       changeBrushColor.bind(null, e.target.value)();
     },
-    [changeBrushColor]
+    []
   );
 
   const handleIsGridVisibleChange = useCallback(
@@ -105,13 +104,19 @@ const Toolbar = forwardRef(function ToolBarInner(
     [setIsGridVisible]
   );
 
-  const handleIsPanZoomableChange = useCallBack((e: { target: { checked: boolean } })) => {
-    setIsPanZoomable(e.target.checked);
-  }, [setIsPanZoomable]);
+  const handleIsPanZoomableChange = useCallback(
+    (e: { target: { checked: boolean } }) => {
+      setIsPanZoomable(e.target.checked);
+    },
+    []
+  );
 
-  const handleIsGridFixedChange = useCallBack((e: { target: { checked: boolean } })) => {
-    setIsGridFixed(e.target.checked);
-  }, [setIsGridFixed]);
+  const handleIsGridFixedChange = useCallback(
+    (e: { target: { checked: boolean } }) => {
+      setIsGridFixed(e.target.checked);
+    },
+    []
+  );
 
   useEffect(() => {
     if (brushMode === BrushMode.DOT) {
@@ -134,7 +139,6 @@ const Toolbar = forwardRef(function ToolBarInner(
       });
     }
   }, [brushMode]);
-
   return (
     <Flex
       width="424px"
