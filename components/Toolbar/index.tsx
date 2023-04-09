@@ -110,7 +110,7 @@ const Toolbar = forwardRef(function ToolBarInner(
     setIsPanZoomable(e.target.checked);
   }, [setIsPanZoomable]);
 
-  const handleIsGridFixedChange = useCallBack()e: { target: { checked: boolean } }) => {
+  const handleIsGridFixedChange = useCallBack((e: { target: { checked: boolean } })) => {
     setIsGridFixed(e.target.checked);
   }, [setIsGridFixed]);
 
