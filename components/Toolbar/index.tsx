@@ -268,9 +268,7 @@ const Toolbar = (
               max={10}
               step={1}
               value={gridStrokeWidth}
-              onChange={(e) => {
-                setGridStrokeWidth(e.target.value);
-              }}
+              onChange={setGridStrokeWidth}
             />
           </Flex>
 
@@ -288,7 +286,7 @@ const Toolbar = (
             <input
               type="color"
               value={gridStrokeColor}
-              onChange={(e) => setGridStrokeColor(e.target.value)}
+              onChange={setGridStrokeColor}
             />
           </Flex>
 
@@ -355,8 +353,8 @@ const Toolbar = (
           </MenuItem>
           <>
             <AlertDialog
-              leastDestructiveRef={cancelRef}
               motionPreset="slideInBottom"
+              leastDestructiveRef={cancelRef}
               onClose={onClose}
               isOpen={isOpen}
               isCentered
@@ -370,7 +368,7 @@ const Toolbar = (
                   Are you sure you want to reset it?
                 </AlertDialogBody>
                 <AlertDialogFooter>
-                  <Button onClick={onClose} ref={cancelRef}>
+                  <Button ref={cancelRef} onClick={onClose}>
                     No
                   </Button>
                   <Button
