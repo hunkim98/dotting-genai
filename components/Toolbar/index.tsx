@@ -60,8 +60,8 @@ const Toolbar = (
     setIsGridVisible,
     setGridStrokeWidth,
     setGridStrokeColor,
-  }: any,
-  ref: any
+  }: ToolbarProps,
+  ref: DottingRef
 ) => {
   const [isSelected, setIsSelected] = useState({
     dot: true,
@@ -79,15 +79,15 @@ const Toolbar = (
     [changeBrushColor]
   );
 
-  const handleIsGridVisibleChange = (e) => {
+  const handleIsGridVisibleChange = (e: { target: { checked: boolean } }) => {
     setIsGridVisible(e.target.checked);
   };
 
-  const handleIsPanZoomableChange = (e) => {
+  const handleIsPanZoomableChange = (e: { target: { checked: boolean } }) => {
     setIsPanZoomable(e.target.checked);
   };
 
-  const handleIsGridFixedChange = (e) => {
+  const handleIsGridFixedChange = (e: { target: { checked: boolean } }) => {
     setIsGridFixed(e.target.checked);
   };
 
@@ -113,7 +113,6 @@ const Toolbar = (
     }
   }, [brushMode]);
 
-  console.log(isGridVisible);
   return (
     <Flex
       width="424px"
@@ -198,7 +197,7 @@ const Toolbar = (
         </Tooltip>
 
         {/* UNDO, REDO */}
-        <Tooltip label="undo" placement="top">
+        <Tooltip label="undo" placement="top" closeOnClick={false}>
           <Button
             width="64px"
             bg="white.500"
@@ -210,7 +209,7 @@ const Toolbar = (
             <Image src={undoIcon} width={24} height={24} alt="undo" />
           </Button>
         </Tooltip>
-        <Tooltip label="redo" placement="top">
+        <Tooltip label="redo" placement="top" closeOnClick={false}>
           <Button
             width="64px"
             bg="white.500"
@@ -260,7 +259,7 @@ const Toolbar = (
               step={1}
               value={gridStrokeWidth}
               onChange={(e) => {
-                setGridStrokeWidth(+e.target.value);
+                setGridStrokeWidth(e.target.value);
               }}
             />
           </Flex>
@@ -350,4 +349,4 @@ const Toolbar = (
   );
 };
 
-export default forwardRef<ToolbarProps, any>(Toolbar);
+export default forwardRef<ToolbarProps, DottingRef>(Toolbar);

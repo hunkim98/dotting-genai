@@ -1,5 +1,5 @@
 import { forwardRef, useState } from "react";
-import { useDotting } from "dotting";
+import { DottingRef, useDotting } from "dotting";
 
 import Image from "next/image";
 import logo from "@/public/logo.svg";
@@ -17,7 +17,7 @@ import { DownloadIcon, HamburgerIcon } from "@chakra-ui/icons";
 
 interface HeaderProps {}
 
-const Header = ({}: HeaderProps, ref: any) => {
+const Header = ({}: HeaderProps, ref: DottingRef) => {
   const [username] = useState("Guest");
   const { downloadImage } = useDotting(ref);
 
@@ -94,4 +94,4 @@ const Header = ({}: HeaderProps, ref: any) => {
   );
 };
 
-export default forwardRef<HeaderProps, any>(Header);
+export default forwardRef<HeaderProps, DottingRef>(Header);
