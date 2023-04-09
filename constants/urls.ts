@@ -1,3 +1,2 @@
-export const AI_URL = "http://34.64.163.60:3000/";
-export const DIFFUSION_URL = AI_URL + "txt2img";
-export const BG_REMOVE_URL = AI_URL + "background_remover";
+export const DIFFUSION_URL = "/genai" + "/txt2img";
+export const BG_REMOVE_URL = "/genai" + "/background_remover";

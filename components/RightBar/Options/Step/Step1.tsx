@@ -41,7 +41,6 @@ const Step1 = () => {
       }
 
       const file = imgRef.current.files[0];
-      const imgUrl = URL.createObjectURL(file);
       const formData = new FormData();
       formData.append("fileobj", file);
       const response = await axios.post(`${BG_REMOVE_URL}`, formData, {
