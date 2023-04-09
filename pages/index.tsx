@@ -217,15 +217,7 @@ export default function Home() {
           ),
         ]);
 
-        // const response = await axios.post(DIFFUSION_URL, { prompt });
-        // // const buffer = Buffer.from(response.data, "utf-8");
-        // // const bufferData = buffer.toJSON().data;
-        // // const view = new Uint8Array(bufferData);
-        // const view = new Uint8Array(response.data.buffer);
-        // const blob = new Blob([view], { type: "image/png" });
-        // const url = URL.createObjectURL(blob);
         const tempImgUrls: Array<string> = [];
-        // tempImgUrls.push(url);
         for (const response of responses) {
           const img = response.data;
           const buffer = Buffer.from(img, "utf-8");
@@ -235,28 +227,7 @@ export default function Home() {
           const url = URL.createObjectURL(blob);
           tempImgUrls.push(url);
         }
-        // const tempImgUrls: Array<string> = [];
-        // for (const buffer of response.data.buffers) {
-        //   // const bufferData = response.data.;
-        //   // const buffer = Buffer.from(bufferFile, "utf-8");
-        //   // const bufferData = buffer.toJSON().data;
-        //   // console.log(bufferData, "this is buffer");
-        //   const view = new Uint8Array(buffer);
-        //   const blob = new Blob([view], { type: "image/png" });
-        //   const url = URL.createObjectURL(blob);
-        //   tempImgUrls.push(url);
-        //   console.log(url);
-        // }
 
-        // const response = await axios.post("/api/diffusion", { prompt });
-        // const buffers = response.data.buffers;
-        // const tempImgUrls: Array<string> = [];
-        // for (const buffer of buffers) {
-        //   const bufferData = new Uint8Array(buffer);
-        //   const blob = new Blob([bufferData], { type: "image/png" });
-        //   const url = URL.createObjectURL(blob);
-        //   tempImgUrls.push(url);
-        // }
         dispatch(setGeneratedImgUrls(tempImgUrls));
 
         dispatch(
