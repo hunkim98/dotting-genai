@@ -1,8 +1,10 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Head from "next/head";
 import { Button } from "@chakra-ui/react";
 import RightBar from "@/components/RightBar";
+import Toolbar from "@/components/Toolbar";
+import Header from "@/components/Header";
 
 import {
   Dotting,
@@ -29,6 +31,11 @@ import { DIFFUSION_URL } from "@/constants/urls";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
+  const [gridStrokeWidth, setGridStrokeWidth] = useState<number>(1);
+  const [gridStrokeColor, setGridStrokeColor] = useState<string>("#000000");
+  const [isGridFixed, setIsGridFixed] = useState<boolean>(false);
+  const [isGridVisible, setIsGridVisible] = useState<boolean>(true);
+  const [isPanZoomable, setIsPanZoomable] = useState<boolean>(true);
 
   const dispatch = useAppDispatch();
   const {
@@ -46,7 +53,7 @@ export default function Home() {
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
   } = useHandlers(ref);
-  const { setIndicatorPixels, colorPixels } = useDotting(ref);
+  const { setIndicatorPixels, colorPixels, downloadImage } = useDotting(ref);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -303,6 +310,12 @@ export default function Home() {
           <Dotting
             ref={ref}
             width={isRightBar ? "calc(100% - 330px)" : "100%"}
+            gridStrokeColor={gridStrokeColor}
+            gridStrokeWidth={gridStrokeWidth}
+            isGridFixed={isGridFixed}
+            isPanZoomable={isPanZoomable}
+            isGridVisible={isGridVisible}
+            style={{ border: "none" }}
             height={"100vh"}
             initData={Array(30)
               .fill("")
@@ -318,6 +331,7 @@ export default function Home() {
                   });
               })}
           />
+
           {isRightBar ? (
             <RightBar onSubmit={callImage} />
           ) : (
@@ -330,6 +344,20 @@ export default function Home() {
               Open Dotting Ai Assistant
             </Button>
           )}
+          <Header downloadImage={downloadImage} isGridVisible={isGridVisible} />
+          <Toolbar
+            ref={ref}
+            isGridFixed={isGridFixed}
+            isPanZoomable={isPanZoomable}
+            isGridVisible={isGridVisible}
+            gridStrokeColor={gridStrokeColor}
+            gridStrokeWidth={gridStrokeWidth}
+            setIsGridFixed={setIsGridFixed}
+            setIsPanZoomable={setIsPanZoomable}
+            setIsGridVisible={setIsGridVisible}
+            setGridStrokeWidth={setGridStrokeWidth}
+            setGridStrokeColor={setGridStrokeColor}
+          />
         </div>
       </main>
     </>
