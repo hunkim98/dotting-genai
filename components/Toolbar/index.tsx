@@ -263,7 +263,7 @@ const Toolbar = forwardRef(function ToolBarInner(
         </MenuButton>
 
         {/* Grid stroke width */}
-        <MenuList fontSize={14} justifyContent={"center"}>
+        <MenuList mb={-6} ml={4} fontSize={14} justifyContent={"center"}>
           <Flex
             height="40px"
             px="4"
