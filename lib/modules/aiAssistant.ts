@@ -4,7 +4,7 @@ import { MessageType } from "@/types/aiAssistant";
 export type AiAssistantState = {
   step: number;
   prompt: string;
-  isRightBar: boolean;
+  isRightBarOpen: boolean;
   messages: MessageType[];
   isPromptDisabled: boolean;
   isOptionsVisible: boolean;
@@ -15,7 +15,7 @@ export const InitialState: AiAssistantState = {
   step: 0,
   prompt: "",
   uploadedImgUrls: [],
-  isRightBar: false,
+  isRightBarOpen: true,
   isOptionsVisible: true,
   isPromptDisabled: true,
   messages: [] as MessageType[],
@@ -25,8 +25,8 @@ export const aiAssistantModule = createSlice({
   name: "aiAssistant",
   initialState: InitialState,
   reducers: {
-    setIsRightBar: (state, action) => {
-      state.isRightBar = action.payload;
+    setIsRightBarOpen: (state, action) => {
+      state.isRightBarOpen = action.payload;
     },
     setPrompt: (state, action) => {
       state.prompt = action.payload;
@@ -57,7 +57,7 @@ export const {
   setPrompt,
   setMessages,
   addMessages,
-  setIsRightBar,
+  setIsRightBarOpen,
   setUploadedImgUrls,
   setIsOptionsVisible,
   setIsPromptDisabled,

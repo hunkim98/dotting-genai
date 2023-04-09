@@ -47,9 +47,7 @@ const Step0 = () => {
             {
               type: ChatType.TEXT,
               from: From.AI,
-              content: `Requested images have been generated. 
-              Use the below sliders to control the pixel grids. 
-              Click the image if you would like to use it on your canvas.`,
+              content: `Your images have been generated. Please select the image you want to use.`,
             },
             ...tempImgUrls.map((url) => {
               return {
@@ -74,12 +72,12 @@ const Step0 = () => {
   return (
     <>
       <ButtonType
-        option={{ title: "Create me an asset", action: createAsset }}
+        option={{ title: "Generate a character", action: createAsset }}
       />
       <InputType
         isLastOption
         ref={imgRef}
-        option={{ title: "Create me a background", action: createBackground }}
+        option={{ title: "Pixelate my local image", action: createBackground }}
       />
     </>
   );

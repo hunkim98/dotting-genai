@@ -11,6 +11,8 @@ import {
 import { useAppDispatch } from "@/lib/hooks";
 import { ChatType, From } from "@/types/aiAssistant";
 import { setIsReceiving } from "@/lib/modules/genAi";
+import axios from "axios";
+import { BG_REMOVE_URL } from "@/constants/urls";
 
 // DESC: step 1 - Generate asset AI with prompt, Upload local image file
 const Step1 = () => {
@@ -39,22 +41,30 @@ const Step1 = () => {
       }
 
       const file = imgRef.current.files[0];
-      const imgUrl = URL.createObjectURL(file);
-      const tempImgUrls: Array<string> = [];
-      tempImgUrls.push(imgUrl);
+      const formData = new FormData();
+      formData.append("fileobj", file);
+      const response = await axios.post(`${BG_REMOVE_URL}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "arraybuffer",
+      });
+      console.log(response.data);
+      const img = response.data;
+      const buffer = Buffer.from(img, "utf-8");
+      const bufferData = buffer.toJSON().data;
+      const view = new Uint8Array(bufferData);
+      const blob = new Blob([view], { type: "image/png" });
+      const url = URL.createObjectURL(blob);
+      const tempImgUrls: Array<string> = [url];
       dispatch(setUploadedImgUrls(tempImgUrls));
-
-      setTimeout(() => {}, 1000);
-
       try {
         dispatch(
           addMessages([
             {
               type: ChatType.TEXT,
               from: From.AI,
-              content: `Requested images have been generated. 
-              Use the below sliders to control the pixel grids. 
-              Click the image if you would like to use it on your canvas.`,
+              content: `Your submitted image has been processed and the background has been removed. Please select the image to use it`,
             },
             ...tempImgUrls.map((url) => {
               return {
@@ -80,7 +90,7 @@ const Step1 = () => {
     <>
       <ButtonType
         option={{
-          title: "Generate asset AI with prompt",
+          title: "Generate character with prompt",
           action: generateAIWithPrompt,
         }}
       />
@@ -88,7 +98,7 @@ const Step1 = () => {
         isLastOption
         ref={imgRef}
         option={{
-          title: "Upload local image file",
+          title: "Extract character from my image",
           action: uploadLocalImageFile,
         }}
       />

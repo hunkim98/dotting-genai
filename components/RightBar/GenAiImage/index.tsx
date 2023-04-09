@@ -1,6 +1,8 @@
 import { pixelateImage } from "@/utils/image/pixelateImage";
 import {
   Box,
+  Center,
+  Container,
   GridItem,
   Slider,
   SliderFilledTrack,
@@ -20,16 +22,23 @@ interface Props {
 
 const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
   const [previewImgUrl, setPreviewImgUrl] = useState<string | null>(null);
+  const [previewDimensions, setPreviewDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const dispatch = useAppDispatch();
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [pixelationDegree, setPixelationDegree] =
     useState<number>(initPixelationDegree);
   const dottingData = useRef<DottingData | null>(null);
   useEffect(() => {
-    pixelateImage(rawImageUrl, pixelationDegree).then(({ imgUrl, data }) => {
-      setPreviewImgUrl(imgUrl);
-      dottingData.current = data;
-    });
+    pixelateImage(rawImageUrl, pixelationDegree).then(
+      ({ imgUrl, data, width, height }) => {
+        setPreviewImgUrl(imgUrl);
+        setPreviewDimensions({ width, height });
+        dottingData.current = data;
+      }
+    );
   }, [rawImageUrl, pixelationDegree, dottingData]);
   const { setSelectedDottingData } = useContext(GenAiDataContext);
 
@@ -40,47 +49,77 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
   return (
     <GridItem
       key={previewImgUrl}
-      onMouseEnter={() => {
-        setIsHovered(true);
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-      }}
       sx={{
-        ":hover": {
-          transform: "scale(1.04)",
-          transition: "transform 0.2s",
-        },
+        paddingTop: 2,
       }}
     >
-      <Image
-        src={previewImgUrl}
-        // fill
-        style={{ marginBottom: 10 }}
-        alt={""}
-        width={160}
-        height={160}
-        onClick={() => {
-          if (dottingData.current) {
-            setSelectedDottingData(dottingData.current);
-          }
+      <Center
+        sx={{
+          position: "relative",
+          marginBottom: 5,
+          ":hover": {
+            transform: "scale(1.04)",
+            transition: "transform 0.2s",
+          },
         }}
-      />
+      >
+        {isHovered && (
+          <Center
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              // width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.3)",
+              pointerEvents: "none",
+              textAlign: "center",
+              color: "white",
+            }}
+          >
+            <strong>Click Image to use in canvas</strong>
+          </Center>
+        )}
+        <Image
+          src={previewImgUrl}
+          // fill
+
+          alt={""}
+          width={160}
+          height={160}
+          style={{
+            cursor: "pointer",
+          }}
+          onMouseEnter={() => {
+            setIsHovered(true);
+          }}
+          onMouseLeave={() => {
+            setIsHovered(false);
+          }}
+          onClick={() => {
+            if (dottingData.current && previewDimensions) {
+              console.log(previewDimensions);
+              setSelectedDottingData({
+                data: dottingData.current,
+                width: previewDimensions.width,
+                height: previewDimensions.height,
+              });
+            }
+          }}
+        />
+      </Center>
       <Slider
-        defaultValue={10}
-        min={5}
-        max={10}
+        defaultValue={6}
+        min={2}
+        max={6}
         step={1}
         value={pixelationDegree}
         onChange={(val) => {
           setPixelationDegree(val);
         }}
-        // onChangeEnd={(val) => {
-        //   setPixelationDegree(val);
-        // }}
       >
         <SliderTrack bg="green.100">
-          <Box position="relative" right={10} />
+          <Box position="relative" right={6} />
           <SliderFilledTrack bg="teal" />
         </SliderTrack>
         <SliderThumb boxSize={6} />

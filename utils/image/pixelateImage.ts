@@ -1,4 +1,5 @@
 import { DottingData, PixelModifyItem } from "dotting";
+
 /**
  * Asynchronously pixelates an image
  * @param imageUrl
@@ -8,7 +9,12 @@ import { DottingData, PixelModifyItem } from "dotting";
 export async function pixelateImage(
   imageUrl: string,
   pixelationFactor: number
-): Promise<{ imgUrl: string; data: DottingData }> {
+): Promise<{
+  imgUrl: string;
+  data: DottingData;
+  width: number;
+  height: number;
+}> {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d")!;
   return new Promise((resolve, reject) => {
@@ -35,11 +41,15 @@ export async function pixelateImage(
         const pixelData: DottingData = new Map();
         let rowIndex = 0;
         let columnIndex = 0;
+        const maxPixelEdgeCount = pixelationFactor * 10;
+        const pixelSkipAmount = Math.floor(
+          Math.max(originalWidth, originalHeight) / maxPixelEdgeCount
+        );
         if (pixelationFactor !== 0) {
-          for (let y = 0; y < originalHeight; y += pixelationFactor) {
+          for (let y = 0; y < originalHeight; y += pixelSkipAmount) {
             rowIndex++;
             pixelData.set(rowIndex, new Map());
-            for (let x = 0; x < originalWidth; x += pixelationFactor) {
+            for (let x = 0; x < originalWidth; x += pixelSkipAmount) {
               // extracting the position of the sample pixel
               const pixelIndexPosition = (x + y * originalWidth) * 4;
               // drawing a square replacing the current pixels
@@ -47,16 +57,25 @@ export async function pixelateImage(
               const green = originalImageData[pixelIndexPosition + 1];
               const blue = originalImageData[pixelIndexPosition + 2];
               const alpha = originalImageData[pixelIndexPosition + 3];
-              const color = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-              context.fillStyle = color;
-              context.fillRect(x, y, pixelationFactor, pixelationFactor);
-              pixelData.get(rowIndex)!.set(columnIndex, { color });
+              let color = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+              if (alpha !== 0) {
+                context.fillStyle = color;
+                context.fillRect(x, y, pixelSkipAmount, pixelSkipAmount);
+                pixelData.get(rowIndex)!.set(columnIndex, { color });
+              }
+
               columnIndex++;
             }
+
             columnIndex = 0;
           }
         }
-        resolve({ imgUrl: canvas.toDataURL(), data: pixelData });
+        resolve({
+          imgUrl: canvas.toDataURL(),
+          data: pixelData,
+          width: Math.floor(originalWidth / pixelSkipAmount),
+          height: Math.floor(originalHeight / pixelSkipAmount),
+        });
       };
       imageObject.onerror = (error) => {
         console.log(error, "This is from pixelateImage.ts");

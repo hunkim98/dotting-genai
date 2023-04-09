@@ -1,8 +1,10 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Head from "next/head";
 import { Button } from "@chakra-ui/react";
 import RightBar from "@/components/RightBar";
+import Toolbar from "@/components/Toolbar";
+import Header from "@/components/Header";
 
 import {
   Dotting,
@@ -17,7 +19,7 @@ import {
   setPrompt,
   setMessages,
   addMessages,
-  setIsRightBar,
+  setIsRightBarOpen,
   setIsOptionsVisible,
   setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
@@ -29,11 +31,19 @@ import { DIFFUSION_URL } from "@/constants/urls";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
+  const [gridStrokeWidth, setGridStrokeWidth] = useState<number>(1);
+  const [gridStrokeColor, setGridStrokeColor] = useState<string>("#000000");
+  const [isGridFixed, setIsGridFixed] = useState<boolean>(false);
+  const [isGridVisible, setIsGridVisible] = useState<boolean>(true);
+  const [isPanZoomable, setIsPanZoomable] = useState<boolean>(true);
 
   const dispatch = useAppDispatch();
-  const { prompt, step, isRightBar, messages } = useAppSelector(
-    (state) => state.aiAssistant
-  );
+  const {
+    prompt,
+    step,
+    isRightBarOpen: isRightBar,
+    messages,
+  } = useAppSelector((state) => state.aiAssistant);
   const { selectedDottingData, setSelectedDottingData } =
     useContext(GenAiDataContext);
 
@@ -43,7 +53,7 @@ export default function Home() {
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
   } = useHandlers(ref);
-  const { setIndicatorPixels, colorPixels } = useDotting(ref);
+  const { setIndicatorPixels, colorPixels, downloadImage } = useDotting(ref);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -66,23 +76,24 @@ export default function Home() {
           return;
         }
         const tempIndicators: Array<PixelModifyItem> = [];
-        const selectedWidth = selectedDottingData.size;
-        const selectedHeight = selectedDottingData.entries().next().value[1]
-          .size as number;
-        const widthOffset = Math.floor(selectedWidth / 2);
-        const heightOffset = Math.floor(selectedHeight / 2);
-        selectedDottingData.forEach((dottingData, dataRowIndex) => {
-          dottingData.forEach((dottingData, dataColumnIndex) => {
-            if (dottingData === null) {
-              return;
-            }
-            tempIndicators.push({
-              rowIndex: dataRowIndex + rowIndex - widthOffset,
-              columnIndex: dataColumnIndex + columnIndex - heightOffset,
-              color: dottingData.color,
+        const widthOffset = Math.floor(selectedDottingData?.width / 2);
+        const heightOffset = Math.floor(selectedDottingData?.height / 2);
+        Array.from(selectedDottingData.data.entries()).forEach(
+          (columnsData) => {
+            const [rowKey, columns] = columnsData;
+            Array.from(columns.entries()).forEach((column) => {
+              const [columnKey, pixel] = column;
+              if (!pixel.color) {
+                return;
+              }
+              tempIndicators.push({
+                rowIndex: rowKey + rowIndex - heightOffset,
+                columnIndex: columnKey + columnIndex - widthOffset,
+                color: pixel.color,
+              });
             });
-          });
-        });
+          }
+        );
         setIndicatorPixels(tempIndicators);
       },
 
@@ -109,26 +120,33 @@ export default function Home() {
       }
       if (hoveredPixel.current !== null) {
         const tempIndicators: Array<PixelModifyItem> = [];
-        const selectedWidth = selectedDottingData.size;
-        const selectedHeight = selectedDottingData.entries().next().value[1]
-          .size as number;
-        const widthOffset = Math.floor(selectedWidth / 2);
-        const heightOffset = Math.floor(selectedHeight / 2);
+        const widthOffset = Math.floor(selectedDottingData.width / 2);
+        const heightOffset = Math.floor(selectedDottingData.height / 2);
         const { rowIndex, columnIndex } = hoveredPixel.current;
-        selectedDottingData.forEach((dottingData, dataRowIndex) => {
-          dottingData.forEach((dottingData, dataColumnIndex) => {
-            if (dottingData === null) {
-              return;
-            }
-            tempIndicators.push({
-              rowIndex: dataRowIndex + rowIndex - widthOffset,
-              columnIndex: dataColumnIndex + columnIndex - heightOffset,
-              color: dottingData.color,
+        Array.from(selectedDottingData.data.entries()).forEach(
+          (columnsData) => {
+            const [rowKey, columns] = columnsData;
+            Array.from(columns.entries()).forEach((column) => {
+              const [columnKey, pixel] = column;
+              if (!pixel.color) {
+                return;
+              }
+              tempIndicators.push({
+                rowIndex: rowKey + rowIndex - heightOffset,
+                columnIndex: columnKey + columnIndex - widthOffset,
+                color: pixel.color,
+              });
             });
-          });
-        });
+          }
+        );
         colorPixels(tempIndicators);
+
+        setSelectedDottingData(null);
+        setIndicatorPixels([]);
       }
+      // this is here since coloring a pixel will trigger a mousedown event
+      event.stopImmediatePropagation();
+      event.stopPropagation();
     };
     addCanvasElementEventListener("mousedown", colorIndicators);
     return () => {
@@ -137,6 +155,8 @@ export default function Home() {
   }, [
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
+    setIndicatorPixels,
+    setSelectedDottingData,
     hoveredPixel,
     colorPixels,
     selectedDottingData,
@@ -183,18 +203,31 @@ export default function Home() {
       dispatch(setIsReceiving(true));
       dispatch(setIsPromptDisabled(true));
       try {
-        const response = await axios.post(
-          `${DIFFUSION_URL}`,
-          { prompt },
-          { responseType: "arraybuffer" }
-        );
-        const img = response.data;
-        const buffer = Buffer.from(img, "utf-8");
-        const bufferData = buffer.toJSON().data;
-        const view = new Uint8Array(bufferData);
-        const blob = new Blob([view], { type: "image/png" });
-        const url = URL.createObjectURL(blob);
-        const tempImgUrls: Array<string> = [url];
+        // we will call diffusion api two times to get two images
+        const responses = await Promise.all([
+          axios.post(
+            `${DIFFUSION_URL}`,
+            { prompt },
+            { responseType: "arraybuffer" }
+          ),
+          axios.post(
+            `${DIFFUSION_URL}`,
+            { prompt },
+            { responseType: "arraybuffer" }
+          ),
+        ]);
+
+        const tempImgUrls: Array<string> = [];
+        for (const response of responses) {
+          const img = response.data;
+          const buffer = Buffer.from(img, "utf-8");
+          const bufferData = buffer.toJSON().data;
+          const view = new Uint8Array(bufferData);
+          const blob = new Blob([view], { type: "image/png" });
+          const url = URL.createObjectURL(blob);
+          tempImgUrls.push(url);
+        }
+
         dispatch(setGeneratedImgUrls(tempImgUrls));
 
         dispatch(
@@ -246,7 +279,7 @@ export default function Home() {
           {
             type: ChatType.TEXT,
             From: From.AI,
-            content: "How would you like to create an asset?",
+            content: "How would you like to create your character?",
           },
         ])
       );
@@ -283,6 +316,12 @@ export default function Home() {
           <Dotting
             ref={ref}
             width={isRightBar ? "calc(100% - 330px)" : "100%"}
+            gridStrokeColor={gridStrokeColor}
+            gridStrokeWidth={gridStrokeWidth}
+            isGridFixed={isGridFixed}
+            isPanZoomable={isPanZoomable}
+            isGridVisible={isGridVisible}
+            style={{ border: "none" }}
             height={"100vh"}
             initData={Array(30)
               .fill("")
@@ -298,18 +337,33 @@ export default function Home() {
                   });
               })}
           />
+
           {isRightBar ? (
             <RightBar onSubmit={callImage} />
           ) : (
             <Button
               borderRadius="16"
-              onClick={() => dispatch(setIsRightBar(true))}
+              onClick={() => dispatch(setIsRightBarOpen(true))}
               style={{ position: "absolute", right: "20px", top: "24px" }}
               colorScheme="teal"
             >
               Open Dotting Ai Assistant
             </Button>
           )}
+          <Header downloadImage={downloadImage} isGridVisible={isGridVisible} />
+          <Toolbar
+            ref={ref}
+            isGridFixed={isGridFixed}
+            isPanZoomable={isPanZoomable}
+            isGridVisible={isGridVisible}
+            gridStrokeColor={gridStrokeColor}
+            gridStrokeWidth={gridStrokeWidth}
+            setIsGridFixed={setIsGridFixed}
+            setIsPanZoomable={setIsPanZoomable}
+            setIsGridVisible={setIsGridVisible}
+            setGridStrokeWidth={setGridStrokeWidth}
+            setGridStrokeColor={setGridStrokeColor}
+          />
         </div>
       </main>
     </>

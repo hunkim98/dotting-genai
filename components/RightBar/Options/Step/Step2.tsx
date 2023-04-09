@@ -9,7 +9,7 @@ import {
   setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
 import ButtonType from "../Type/ButtonType";
-import { DIFFUSION_URL } from '@/constants/urls';
+import { DIFFUSION_URL } from "@/constants/urls";
 import { ChatType, From } from "@/types/aiAssistant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
@@ -31,24 +31,35 @@ const Step2 = () => {
         {
           type: ChatType.TEXT,
           from: From.AI,
-          content: "Regenerating image... Please wait a few seconds.",
+          content: "Regenerating images... Please wait a few seconds.",
         },
       ])
     );
 
     try {
-      const response = await axios.post(
-        `${DIFFUSION_URL}`,
-        { prompt },
-        { responseType: "arraybuffer" }
-      );
-      const img = response.data;
-      const buffer = Buffer.from(img, "utf-8");
-      const bufferData = buffer.toJSON().data;
-      const view = new Uint8Array(bufferData);
-      const blob = new Blob([view], { type: "image/png" });
-      const url = URL.createObjectURL(blob);
-      const tempImgUrls: Array<string> = [url];
+      // we will call diffusion api two times to get two images
+      const responses = await Promise.all([
+        axios.post(
+          `${DIFFUSION_URL}`,
+          { prompt },
+          { responseType: "arraybuffer" }
+        ),
+        axios.post(
+          `${DIFFUSION_URL}`,
+          { prompt },
+          { responseType: "arraybuffer" }
+        ),
+      ]);
+      const tempImgUrls: Array<string> = [];
+      for (const response of responses) {
+        const img = response.data;
+        const buffer = Buffer.from(img, "utf-8");
+        const bufferData = buffer.toJSON().data;
+        const view = new Uint8Array(bufferData);
+        const blob = new Blob([view], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+        tempImgUrls.push(url);
+      }
       dispatch(setGeneratedImgUrls(tempImgUrls));
 
       dispatch(
@@ -56,7 +67,7 @@ const Step2 = () => {
           {
             type: ChatType.TEXT,
             from: From.AI,
-            content: `‘${prompt}’ images have been generated. Use the below sliders to control the pixel grids. Click the image if you would like to use it on your canvas.`,
+            content: `Your images have been regenerated. Please select the image you want to use.`,
           },
           ...tempImgUrls.map((url) => {
             return {
