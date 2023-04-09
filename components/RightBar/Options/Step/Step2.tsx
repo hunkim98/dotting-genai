@@ -38,18 +38,18 @@ const Step2 = () => {
 
     try {
       // we will call diffusion api two times to get two images
-      const responses = await Promise.all([
-        axios.post(
-          `${DIFFUSION_URL}`,
-          { prompt },
-          { responseType: "arraybuffer" }
-        ),
-        axios.post(
-          `${DIFFUSION_URL}`,
-          { prompt },
-          { responseType: "arraybuffer" }
-        ),
-      ]);
+      // const responses = await Promise.all([
+      //   axios.post(
+      //     `${DIFFUSION_URL}`,
+      //     { prompt },
+      //     { responseType: "arraybuffer" }
+      //   ),
+      //   axios.post(
+      //     `${DIFFUSION_URL}`,
+      //     { prompt },
+      //     { responseType: "arraybuffer" }
+      //   ),
+      // ]);
       const response = await axios.post("/api/diffusion", { prompt });
       const buffers = response.data.buffers;
       const tempImgUrls: Array<string> = [];
