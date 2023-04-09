@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import { DottingRef, useBrush, useDotting } from "dotting";
 import Image from "next/image";
 
@@ -26,6 +26,14 @@ import {
   MenuList,
   IconButton,
   MenuButton,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogCloseButton,
+  AlertDialogBody,
+  AlertDialogFooter,
+  useDisclosure,
 } from "@chakra-ui/react";
 
 export enum BrushMode {
@@ -63,6 +71,8 @@ const Toolbar = (
   }: ToolbarProps,
   ref: DottingRef
 ) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
   const [isSelected, setIsSelected] = useState({
     dot: true,
     eraser: false,
@@ -340,9 +350,43 @@ const Toolbar = (
           </Flex>
 
           {/* clear canvas */}
-          <MenuItem onClick={clear} pl="4" height="40px" icon={<DeleteIcon />}>
+          <MenuItem onClick={onOpen} pl="4" height="40px" icon={<DeleteIcon />}>
             clear canvas
           </MenuItem>
+          <>
+            <AlertDialog
+              leastDestructiveRef={cancelRef}
+              motionPreset="slideInBottom"
+              onClose={onClose}
+              isOpen={isOpen}
+              isCentered
+            >
+              <AlertDialogOverlay />
+
+              <AlertDialogContent>
+                <AlertDialogHeader>DOTTING CLEAR</AlertDialogHeader>
+                <AlertDialogCloseButton />
+                <AlertDialogBody>
+                  Are you sure you want to reset it?
+                </AlertDialogBody>
+                <AlertDialogFooter>
+                  <Button onClick={onClose} ref={cancelRef}>
+                    No
+                  </Button>
+                  <Button
+                    colorScheme="teal"
+                    ml={3}
+                    onClick={() => {
+                      clear();
+                      onClose();
+                    }}
+                  >
+                    Yes
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         </MenuList>
       </Menu>
     </Flex>
