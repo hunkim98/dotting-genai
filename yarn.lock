@@ -1041,12 +1041,12 @@
 
 "@next/swc-darwin-arm64@13.2.4":
   version "13.2.4"
-  resolved "https://registry.yarnpkg.com/@next/swc-darwin-arm64/-/swc-darwin-arm64-13.2.4.tgz#5006fca179a36ef3a24d293abadec7438dbb48c6"
+  resolved "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-13.2.4.tgz"
   integrity sha512-S6vBl+OrInP47TM3LlYx65betocKUUlTZDDKzTiRDbsRESeyIkBtZ6Qi5uT2zQs4imqllJznVjFd1bXLx3Aa6A==
 
 "@next/swc-darwin-x64@13.2.4":
   version "13.2.4"
-  resolved "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-13.2.4.tgz"
+  resolved "https://registry.yarnpkg.com/@next/swc-darwin-x64/-/swc-darwin-x64-13.2.4.tgz#6549c7c04322766acc3264ccdb3e1b43fcaf7946"
   integrity sha512-a6LBuoYGcFOPGd4o8TPo7wmv5FnMr+Prz+vYHopEDuhDoMSHOnC+v+Ab4D7F0NMZkvQjEJQdJS3rqgFhlZmKlw==
 
 "@next/swc-freebsd-x64@13.2.4":
@@ -1680,10 +1680,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dotting@^1.0.12:
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/dotting/-/dotting-1.0.12.tgz#00cbad8f8a48ba03da8991dc945cc3c39eefec35"
-  integrity sha512-MObZNmjkL8Fsrn7aGYrdzyu6RSmckGeu801QWXxkcyXR+KbR5pO8mEgi+Jhp3xWrlxiRhQ6r6LqoySNWwQgQVA==
+dotting@^1.0.13:
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/dotting/-/dotting-1.0.13.tgz#03ae661de629eebade6f152d9795a690c173cb65"
+  integrity sha512-8Y2mVKaF+cXjNBzmxAZiZZMPGY+ZTVAvlhm7UllQJ+D7tVy3KdAlPeCL0RQ2yp54jwqtAroZHiE3ImeighFr4w==
 
 emoji-regex@^9.2.2:
   version "9.2.2"
