@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "link-local-dotting": "npm link dotting && yarn link react && yarn link react-dom && yarn add link:../dotting",
+    "link-local-dotting": "yarn link dotting && yarn link react && yarn link react-dom && yarn add link:../dotting",
     "unlink-local-dotting": "yarn remove dotting && yarn unlink dotting && yarn unlink react && yarn unlink react-dom && yarn add dotting "
   },
   "dependencies": {
@@ -20,7 +20,7 @@
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
     "axios": "^1.3.4",
-    "dotting": "^1.0.10",
+    "dotting": "^1.0.13",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "framer-motion": "^10.10.0",

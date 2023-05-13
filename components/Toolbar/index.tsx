@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { DottingRef, useBrush, useDotting } from "dotting";
+import { DottingRef, useBrush, useDotting, BrushTool } from "dotting";
 import Image from "next/image";
 
 import dot from "@/public/dot-icon.svg";
@@ -42,12 +42,6 @@ import {
   AlertDialogFooter,
   useDisclosure,
 } from "@chakra-ui/react";
-
-export enum BrushMode {
-  DOT = "dot",
-  ERASER = "eraser",
-  PAINT_BUCKET = "paint_bucket",
-}
 
 interface ToolbarProps {
   isGridFixed: boolean;
@@ -105,7 +99,7 @@ const Toolbar = forwardRef(function ToolBarInner(
       document.removeEventListener("keydown", keyboardRedoListener);
     };
   }, []);
-  const { changeBrushColor, changeBrushMode, brushMode, brushColor } =
+  const { changeBrushColor, changeBrushTool, brushTool, brushColor } =
     //@ts-ignore
     useBrush(ref);
 
@@ -138,26 +132,26 @@ const Toolbar = forwardRef(function ToolBarInner(
   );
 
   useEffect(() => {
-    if (brushMode === BrushMode.DOT) {
+    if (brushTool === BrushTool.DOT) {
       setIsSelected({
         dot: true,
         eraser: false,
         paint_bucket: false,
       });
-    } else if (brushMode === BrushMode.ERASER) {
+    } else if (brushTool === BrushTool.ERASER) {
       setIsSelected({
         dot: false,
         eraser: true,
         paint_bucket: false,
       });
-    } else if (brushMode === BrushMode.PAINT_BUCKET) {
+    } else if (brushTool === BrushTool.PAINT_BUCKET) {
       setIsSelected({
         dot: false,
         eraser: false,
         paint_bucket: true,
       });
     }
-  }, [brushMode]);
+  }, [brushTool]);
   return (
     <Flex
       width="424px"
@@ -206,7 +200,7 @@ const Toolbar = forwardRef(function ToolBarInner(
             borderRadius="0"
             borderRight="1px solid #E4E7EC"
             onClick={() => {
-              changeBrushMode(BrushMode.DOT);
+              changeBrushTool(BrushTool.DOT);
             }}
           >
             <Image src={dot} width={24} height={24} alt="dot" />
@@ -220,7 +214,7 @@ const Toolbar = forwardRef(function ToolBarInner(
             borderRadius="0"
             borderRight="1px solid #E4E7EC"
             onClick={() => {
-              changeBrushMode(BrushMode.PAINT_BUCKET);
+              changeBrushTool(BrushTool.PAINT_BUCKET);
             }}
           >
             <Image src={paintBucket} width={23} height={23} alt="paint" />
@@ -234,7 +228,7 @@ const Toolbar = forwardRef(function ToolBarInner(
             borderRadius="0"
             borderRight="1px solid #E4E7EC"
             onClick={() => {
-              changeBrushMode(BrushMode.ERASER);
+              changeBrushTool(BrushTool.ERASER);
             }}
           >
             <Image src={eraser} width={20} height={20} alt="eraser" />
