@@ -238,18 +238,17 @@ export default function Home() {
         strokedPixels,
         strokeStartNeighboringPixels: strokeStartAreaPixels,
       };
-      console.log(body);
-      // axios
-      //   .post("/api/track/stroke", body)
-      //   .then((res) => {
-      //     console.log(res.data);
-      //   })
-      //   .then(() => {
-      //     setStrokeStartAreaPixels([]);
-      //   })
-      //   .catch(() => {
-      //     setStrokeStartAreaPixels([]);
-      //   });
+      axios
+        .post("/api/track/stroke", body)
+        .then((res) => {
+          console.log(res.data);
+        })
+        .then(() => {
+          setStrokeStartAreaPixels([]);
+        })
+        .catch(() => {
+          setStrokeStartAreaPixels([]);
+        });
     },
     [strokeStartAreaPixels, setStrokeStartAreaPixels]
   );
@@ -433,9 +432,6 @@ export default function Home() {
               borderRadius="16"
               onClick={() => {
                 dispatch(setIsRightBarOpen(true));
-                axios.post("/api/track/stroke", { data: "hi" }).then((res) => {
-                  console.log(res);
-                });
               }}
               style={{ position: "absolute", right: "20px", top: "24px" }}
               colorScheme="teal"
