@@ -343,7 +343,12 @@ export default function Home() {
           ) : (
             <Button
               borderRadius="16"
-              onClick={() => dispatch(setIsRightBarOpen(true))}
+              onClick={() => {
+                dispatch(setIsRightBarOpen(true));
+                axios.post("/api/track/stroke", { data: "hi" }).then((res) => {
+                  console.log(res);
+                });
+              }}
               style={{ position: "absolute", right: "20px", top: "24px" }}
               colorScheme="teal"
             >
