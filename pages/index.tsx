@@ -50,6 +50,7 @@ export default function Home() {
     isRightBarOpen: isRightBar,
     messages,
   } = useAppSelector((state) => state.aiAssistant);
+  const userId = useAppSelector((state) => state.user.userId);
   const { selectedDottingData, setSelectedDottingData } =
     useContext(GenAiDataContext);
 
@@ -234,6 +235,8 @@ export default function Home() {
   const handleStrokeEndHandler = useCallback<CanvasStrokeEndHandler>(
     ({ strokeTool, strokedPixels }) => {
       const body: PostTrackStrokeBodyDto = {
+        userId: "dotting-service-" + userId,
+        createdAt: new Date(),
         strokeTool,
         strokedPixels,
         strokeStartNeighboringPixels: strokeStartAreaPixels,
@@ -250,7 +253,7 @@ export default function Home() {
           setStrokeStartAreaPixels([]);
         });
     },
-    [strokeStartAreaPixels, setStrokeStartAreaPixels]
+    [strokeStartAreaPixels, setStrokeStartAreaPixels, userId]
   );
 
   useEffect(() => {
@@ -432,6 +435,7 @@ export default function Home() {
               borderRadius="16"
               onClick={() => {
                 dispatch(setIsRightBarOpen(true));
+                console.log(userId);
               }}
               style={{ position: "absolute", right: "20px", top: "24px" }}
               colorScheme="teal"

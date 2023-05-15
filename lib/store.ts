@@ -3,6 +3,7 @@ import { createWrapper } from "next-redux-wrapper";
 import { traceApi } from "./api/traceApi";
 import { genAiModule } from "./modules/genAi";
 import { aiAssistantModule } from "./modules/aiAssistant";
+import { userModule } from "./modules/user";
 
 export const makeStore = () =>
   configureStore({
@@ -10,6 +11,7 @@ export const makeStore = () =>
       [traceApi.reducerPath]: traceApi.reducer,
       [genAiModule.name]: genAiModule.reducer,
       [aiAssistantModule.name]: aiAssistantModule.reducer,
+      [userModule.name]: userModule.reducer,
     },
     middleware: (gDM) => gDM().concat(traceApi.middleware),
   });
