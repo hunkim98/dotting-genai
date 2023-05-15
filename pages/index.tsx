@@ -62,12 +62,12 @@ export default function Home() {
 
   const handleHoverPixelChangeHandler =
     useCallback<CanvasHoverPixelChangeHandler>(
-      (indices) => {
-        if (indices === null) {
+      (params) => {
+        if (params.indices === null) {
           return;
         }
 
-        const { rowIndex, columnIndex } = indices;
+        const { rowIndex, columnIndex } = params.indices;
         hoveredPixel.current = {
           rowIndex,
           columnIndex,
