@@ -13,6 +13,8 @@ import {
   useHandlers,
   PixelModifyItem,
   CanvasHoverPixelChangeHandler,
+  CanvasStrokeEndHandler,
+  useData,
 } from "dotting";
 import {
   setStep,
@@ -28,6 +30,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { GenAiDataContext } from "@/context/GenAiDataContext";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 import { DIFFUSION_URL } from "@/constants/urls";
+import { PostTrackStrokeBodyDto } from "@/dto/track/body/post.track.stroke.body.dto";
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
@@ -36,6 +39,9 @@ export default function Home() {
   const [isGridFixed, setIsGridFixed] = useState<boolean>(false);
   const [isGridVisible, setIsGridVisible] = useState<boolean>(true);
   const [isPanZoomable, setIsPanZoomable] = useState<boolean>(true);
+  const [strokeStartAreaPixels, setStrokeStartAreaPixels] = useState<
+    Array<PixelModifyItem>
+  >([]);
 
   const dispatch = useAppDispatch();
   const {
@@ -52,8 +58,11 @@ export default function Home() {
     removeHoverPixelChangeListener,
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
+    addStrokeEndListener,
+    removeStrokeEndListener,
   } = useHandlers(ref);
   const { setIndicatorPixels, colorPixels, downloadImage } = useDotting(ref);
+  const { data } = useData(ref);
 
   const hoveredPixel = useRef<{
     rowIndex: number;
@@ -119,6 +128,7 @@ export default function Home() {
         return;
       }
       if (hoveredPixel.current !== null) {
+        console.log(hoveredPixel.current);
         const tempIndicators: Array<PixelModifyItem> = [];
         const widthOffset = Math.floor(selectedDottingData.width / 2);
         const heightOffset = Math.floor(selectedDottingData.height / 2);
@@ -160,6 +170,7 @@ export default function Home() {
     hoveredPixel,
     colorPixels,
     selectedDottingData,
+    data,
   ]);
 
   useEffect(() => {
@@ -172,6 +183,83 @@ export default function Home() {
     removeHoverPixelChangeListener,
     handleHoverPixelChangeHandler,
   ]);
+
+  useEffect(() => {
+    const neighborMaxDegree = 2;
+    const recordNeighboringPixels = (event: Event) => {
+      if (hoveredPixel.current === null) {
+        return;
+      }
+      const { rowIndex, columnIndex } = hoveredPixel.current;
+      const neighboringPixels: Array<PixelModifyItem> = [];
+      for (let i = -2; i <= neighborMaxDegree; i++) {
+        for (let j = -2; j <= neighborMaxDegree; j++) {
+          const rowIndexToCheck = rowIndex + i;
+          const columnIndexToCheck = columnIndex + j;
+          const doesColorExist =
+            data.get(rowIndexToCheck) &&
+            data.get(rowIndexToCheck)!.get(columnIndexToCheck)?.color;
+          if (doesColorExist) {
+            neighboringPixels.push({
+              rowIndex: rowIndexToCheck,
+              columnIndex: columnIndexToCheck,
+              color: data.get(rowIndexToCheck)!.get(columnIndexToCheck)!.color,
+            });
+          } else {
+            neighboringPixels.push({
+              rowIndex: rowIndexToCheck,
+              columnIndex: columnIndexToCheck,
+              color: "",
+            });
+          }
+        }
+      }
+      setStrokeStartAreaPixels(neighboringPixels);
+      // this is here since coloring a pixel will trigger a mousedown event
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+    };
+    addCanvasElementEventListener("mousedown", recordNeighboringPixels);
+    return () => {
+      removeCanvasElementEventListener("mousedown", recordNeighboringPixels);
+    };
+  }, [
+    addCanvasElementEventListener,
+    removeCanvasElementEventListener,
+    data,
+    setStrokeStartAreaPixels,
+    hoveredPixel,
+  ]);
+
+  const handleStrokeEndHandler = useCallback<CanvasStrokeEndHandler>(
+    ({ strokeTool, strokedPixels }) => {
+      const body: PostTrackStrokeBodyDto = {
+        strokeTool,
+        strokedPixels,
+        strokeStartNeighboringPixels: strokeStartAreaPixels,
+      };
+      console.log(body);
+      // axios
+      //   .post("/api/track/stroke", body)
+      //   .then((res) => {
+      //     console.log(res.data);
+      //   })
+      //   .then(() => {
+      //     setStrokeStartAreaPixels([]);
+      //   })
+      //   .catch(() => {
+      //     setStrokeStartAreaPixels([]);
+      //   });
+    },
+    [strokeStartAreaPixels, setStrokeStartAreaPixels]
+  );
+
+  useEffect(() => {
+    addStrokeEndListener(handleStrokeEndHandler);
+    return () => {
+      removeStrokeEndListener(handleStrokeEndHandler);
+    };
+  }, [addStrokeEndListener, removeStrokeEndListener, handleStrokeEndHandler]);
 
   /* 
     🖍 ABOUT RightBar
