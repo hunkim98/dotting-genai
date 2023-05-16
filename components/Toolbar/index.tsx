@@ -14,6 +14,7 @@ import undoIcon from "@/public/undo-icon.svg";
 import redoIcon from "@/public/redo-icon.svg";
 import eraser from "@/public/eraser-icon.svg";
 import paintBucket from "@/public/paint-bucket-icon.svg";
+import selectIcon from "@/public/select-icon.svg";
 
 import {
   ViewIcon,
@@ -77,6 +78,7 @@ const Toolbar = forwardRef(function ToolBarInner(
     dot: true,
     eraser: false,
     paint_bucket: false,
+    select: false,
   });
   //@ts-ignore
   const { undo, redo, clear } = useDotting(ref);
@@ -137,18 +139,28 @@ const Toolbar = forwardRef(function ToolBarInner(
         dot: true,
         eraser: false,
         paint_bucket: false,
+        select: false,
       });
     } else if (brushTool === BrushTool.ERASER) {
       setIsSelected({
         dot: false,
         eraser: true,
         paint_bucket: false,
+        select: false,
       });
     } else if (brushTool === BrushTool.PAINT_BUCKET) {
       setIsSelected({
         dot: false,
         eraser: false,
         paint_bucket: true,
+        select: false,
+      });
+    } else if (brushTool === BrushTool.SELECT) {
+      setIsSelected({
+        dot: false,
+        eraser: false,
+        paint_bucket: false,
+        select: true,
       });
     }
   }, [brushTool]);
@@ -220,6 +232,7 @@ const Toolbar = forwardRef(function ToolBarInner(
             <Image src={paintBucket} width={23} height={23} alt="paint" />
           </Button>
         </Tooltip>
+
         <Tooltip label="eraser" placement="top">
           <Button
             width="64px"
@@ -232,6 +245,20 @@ const Toolbar = forwardRef(function ToolBarInner(
             }}
           >
             <Image src={eraser} width={20} height={20} alt="eraser" />
+          </Button>
+        </Tooltip>
+        <Tooltip label="select" placement="top">
+          <Button
+            width="64px"
+            bg={isSelected["select"] ? "#E4E4E4" : "white.500"}
+            _hover={{ bg: "gray.200" }}
+            borderRadius="0"
+            borderRight="1px solid #E4E7EC"
+            onClick={() => {
+              changeBrushTool(BrushTool.SELECT);
+            }}
+          >
+            <Image src={selectIcon} width={23} height={23} alt="select" />
           </Button>
         </Tooltip>
 

@@ -15,6 +15,8 @@ import {
   CanvasHoverPixelChangeHandler,
   CanvasStrokeEndHandler,
   useData,
+  useBrush,
+  BrushTool,
 } from "dotting";
 import {
   setStep,
@@ -31,6 +33,9 @@ import { GenAiDataContext } from "@/context/GenAiDataContext";
 import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 import { DIFFUSION_URL } from "@/constants/urls";
 import { PostTrackStrokeBodyDto } from "@/dto/track/body/post.track.stroke.body.dto";
+import { getNeighboringPixels } from "@/utils/record";
+
+const neighborMaxDegree = 2;
 
 export default function Home() {
   const ref = useRef<DottingRef>(null);
@@ -39,9 +44,6 @@ export default function Home() {
   const [isGridFixed, setIsGridFixed] = useState<boolean>(false);
   const [isGridVisible, setIsGridVisible] = useState<boolean>(true);
   const [isPanZoomable, setIsPanZoomable] = useState<boolean>(true);
-  const [strokeStartAreaPixels, setStrokeStartAreaPixels] = useState<
-    Array<PixelModifyItem>
-  >([]);
 
   const dispatch = useAppDispatch();
   const {
@@ -63,6 +65,7 @@ export default function Home() {
     removeStrokeEndListener,
   } = useHandlers(ref);
   const { setIndicatorPixels, colorPixels, downloadImage } = useDotting(ref);
+  const { changeBrushTool } = useBrush(ref);
   const { data } = useData(ref);
 
   const hoveredPixel = useRef<{
@@ -104,10 +107,11 @@ export default function Home() {
             });
           }
         );
+        changeBrushTool(BrushTool.NONE);
         setIndicatorPixels(tempIndicators);
       },
 
-      [hoveredPixel, setIndicatorPixels, selectedDottingData]
+      [hoveredPixel, setIndicatorPixels, selectedDottingData, changeBrushTool]
     );
 
   useEffect(() => {
@@ -115,13 +119,14 @@ export default function Home() {
       if (event.key === "Escape") {
         setSelectedDottingData(null);
         setIndicatorPixels([]);
+        changeBrushTool(BrushTool.DOT);
       }
     };
     window.addEventListener("keydown", escapeKeyEvent);
     return () => {
       window.removeEventListener("keydown", escapeKeyEvent);
     };
-  }, [setSelectedDottingData, setIndicatorPixels]);
+  }, [setSelectedDottingData, setIndicatorPixels, changeBrushTool]);
 
   useEffect(() => {
     const colorIndicators = (event: Event) => {
@@ -151,19 +156,37 @@ export default function Home() {
           }
         );
         colorPixels(tempIndicators);
+        const neighboringPixels = getNeighboringPixels({
+          rowIndex,
+          columnIndex,
+          data,
+        });
+        const body: PostTrackStrokeBodyDto = {
+          userId: userId,
+          strokedPixels: tempIndicators,
+          strokeTool: "GENAI",
+          strokeStartNeighboringPixels: neighboringPixels,
+          createdAt: new Date(),
+        };
+        axios.post("/api/track/stroke", body).then((res) => {
+          console.log(res.data);
+        });
 
         setSelectedDottingData(null);
         setIndicatorPixels([]);
+        // changeBrushTool(BrushTool.DOT);
       }
       // this is here since coloring a pixel will trigger a mousedown event
       event.stopImmediatePropagation();
       event.stopPropagation();
+      changeBrushTool(BrushTool.DOT);
     };
     addCanvasElementEventListener("mousedown", colorIndicators);
     return () => {
       removeCanvasElementEventListener("mousedown", colorIndicators);
     };
   }, [
+    changeBrushTool,
     addCanvasElementEventListener,
     removeCanvasElementEventListener,
     setIndicatorPixels,
@@ -172,6 +195,7 @@ export default function Home() {
     colorPixels,
     selectedDottingData,
     data,
+    userId,
   ]);
 
   useEffect(() => {
@@ -185,75 +209,29 @@ export default function Home() {
     handleHoverPixelChangeHandler,
   ]);
 
-  useEffect(() => {
-    const neighborMaxDegree = 2;
-    const recordNeighboringPixels = (event: Event) => {
+  const handleStrokeEndHandler = useCallback<CanvasStrokeEndHandler>(
+    ({ strokeTool, strokedPixels }) => {
       if (hoveredPixel.current === null) {
         return;
       }
       const { rowIndex, columnIndex } = hoveredPixel.current;
-      const neighboringPixels: Array<PixelModifyItem> = [];
-      for (let i = -2; i <= neighborMaxDegree; i++) {
-        for (let j = -2; j <= neighborMaxDegree; j++) {
-          const rowIndexToCheck = rowIndex + i;
-          const columnIndexToCheck = columnIndex + j;
-          const doesColorExist =
-            data.get(rowIndexToCheck) &&
-            data.get(rowIndexToCheck)!.get(columnIndexToCheck)?.color;
-          if (doesColorExist) {
-            neighboringPixels.push({
-              rowIndex: rowIndexToCheck,
-              columnIndex: columnIndexToCheck,
-              color: data.get(rowIndexToCheck)!.get(columnIndexToCheck)!.color,
-            });
-          } else {
-            neighboringPixels.push({
-              rowIndex: rowIndexToCheck,
-              columnIndex: columnIndexToCheck,
-              color: "",
-            });
-          }
-        }
-      }
-      setStrokeStartAreaPixels(neighboringPixels);
-      // this is here since coloring a pixel will trigger a mousedown event
-      event.stopImmediatePropagation();
-      event.stopPropagation();
-    };
-    addCanvasElementEventListener("mousedown", recordNeighboringPixels);
-    return () => {
-      removeCanvasElementEventListener("mousedown", recordNeighboringPixels);
-    };
-  }, [
-    addCanvasElementEventListener,
-    removeCanvasElementEventListener,
-    data,
-    setStrokeStartAreaPixels,
-    hoveredPixel,
-  ]);
-
-  const handleStrokeEndHandler = useCallback<CanvasStrokeEndHandler>(
-    ({ strokeTool, strokedPixels }) => {
+      const neighboringPixels = getNeighboringPixels({
+        rowIndex,
+        columnIndex,
+        data,
+      });
       const body: PostTrackStrokeBodyDto = {
         userId: "dotting-service-" + userId,
         createdAt: new Date(),
         strokeTool,
         strokedPixels,
-        strokeStartNeighboringPixels: strokeStartAreaPixels,
+        strokeStartNeighboringPixels: neighboringPixels,
       };
-      axios
-        .post("/api/track/stroke", body)
-        .then((res) => {
-          console.log(res.data);
-        })
-        .then(() => {
-          setStrokeStartAreaPixels([]);
-        })
-        .catch(() => {
-          setStrokeStartAreaPixels([]);
-        });
+      axios.post("/api/track/stroke", body).then((res) => {
+        console.log(res.data);
+      });
     },
-    [strokeStartAreaPixels, setStrokeStartAreaPixels, userId]
+    [userId, data, hoveredPixel]
   );
 
   useEffect(() => {
