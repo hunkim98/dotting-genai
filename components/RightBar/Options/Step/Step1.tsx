@@ -88,7 +88,7 @@ const Step1 = () => {
 
   return (
     <>
-      <ButtonType
+      {/* <ButtonType
         option={{
           title: "Generate character with prompt",
           action: generateAIWithPrompt,
@@ -101,7 +101,7 @@ const Step1 = () => {
           title: "Extract character from my image",
           action: uploadLocalImageFile,
         }}
-      />
+      /> */}
     </>
   );
 };

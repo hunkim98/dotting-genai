@@ -366,21 +366,31 @@ export default function Home() {
           {
             type: ChatType.TEXT,
             From: From.AI,
-            content: "How would you like to create your character?",
-          },
-        ])
-      );
-    } else if (step === 2) {
-      dispatch(
-        addMessages([
-          {
-            type: ChatType.TEXT,
-            From: From.AI,
             content: "Please input your prompt.",
           },
         ])
       );
+      // dispatch(
+      //   addMessages([
+      //     {
+      //       type: ChatType.TEXT,
+      //       From: From.AI,
+      //       content: "How would you like to create your character?",
+      //     },
+      //   ])
+      // );
     }
+    // else if (step === 2) {
+    //   dispatch(
+    //     addMessages([
+    //       {
+    //         type: ChatType.TEXT,
+    //         From: From.AI,
+    //         content: "Please input your prompt.",
+    //       },
+    //     ])
+    //   );
+    // }
   }, [step]);
 
   return (
@@ -425,8 +435,7 @@ export default function Home() {
                   });
               })}
           />
-
-          {/* {isRightBar ? (
+          {isRightBar ? (
             <RightBar onSubmit={callImage} />
           ) : (
             <Button
@@ -440,7 +449,7 @@ export default function Home() {
             >
               Open Dotting Ai Assistant
             </Button>
-          )} */}
+          )}
           <Header downloadImage={downloadImage} isGridVisible={isGridVisible} />
           <Toolbar
             ref={ref}

@@ -100,10 +100,12 @@ const Step2 = () => {
       <ButtonType
         isLastOption
         option={{
-          title: "Ask for other options",
+          title: "Generate other asset",
           action: () => {
             dispatch(setPrompt(""));
-            dispatch(setStep(0));
+            dispatch(setIsPromptDisabled(false));
+            // dispatch(setStep(0));
+            dispatch(setStep(1));
           },
         }}
       />

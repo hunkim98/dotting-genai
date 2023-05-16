@@ -19,6 +19,7 @@ const Prompt = ({ onSubmit }: PromptProps) => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       const lastMessageContent = lastMessage.content;
+      console.log(lastMessageContent);
       if (lastMessageContent === "Please input your prompt.") {
         inputRef.current?.focus();
       }

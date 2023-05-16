@@ -6,6 +6,7 @@ import {
   addMessages,
   setIsOptionsVisible,
   setUploadedImgUrls,
+  setIsPromptDisabled,
 } from "@/lib/modules/aiAssistant";
 import { setIsReceiving } from "@/lib/modules/genAi";
 import { ChatType, From } from "@/types/aiAssistant";
@@ -18,7 +19,9 @@ const Step0 = () => {
 
   // DESC: step 0 (first option) Create me an asset
   const createAsset = useCallback(() => {
+    // dispatch(setStep(1));
     dispatch(setStep(1));
+    dispatch(setIsPromptDisabled(false));
   }, [dispatch]);
 
   // DESC: step 0 (second option) Create me a background
@@ -74,11 +77,11 @@ const Step0 = () => {
       <ButtonType
         option={{ title: "Generate an asset", action: createAsset }}
       />
-      <InputType
+      {/* <InputType
         isLastOption
         ref={imgRef}
         option={{ title: "Pixelate my local image", action: createBackground }}
-      />
+      /> */}
     </>
   );
 };

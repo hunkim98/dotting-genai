@@ -23,14 +23,14 @@ const ButtonType = ({ option, isLastOption }: ButtonTypeProps) => {
       >
         {title}
       </Button>
-      {!isLastOption && (
+      {/* {!isLastOption && (
         <hr
           style={{
             width: "170px",
             border: "0.5px solid rgba(196, 196, 196, 0.8)",
           }}
         />
-      )}
+      )} */}
     </Flex>
   );
 };
