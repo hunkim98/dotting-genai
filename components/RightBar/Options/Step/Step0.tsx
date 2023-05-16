@@ -72,7 +72,7 @@ const Step0 = () => {
   return (
     <>
       <ButtonType
-        option={{ title: "Generate a character", action: createAsset }}
+        option={{ title: "Generate an asset", action: createAsset }}
       />
       <InputType
         isLastOption

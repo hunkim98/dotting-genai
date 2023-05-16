@@ -15,7 +15,7 @@ export const InitialState: AiAssistantState = {
   step: 0,
   prompt: "",
   uploadedImgUrls: [],
-  isRightBarOpen: true,
+  isRightBarOpen: false,
   isOptionsVisible: true,
   isPromptDisabled: true,
   messages: [] as MessageType[],

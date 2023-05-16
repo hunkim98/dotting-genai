@@ -18,3 +18,5 @@ export const userModule = createSlice({
     },
   },
 });
+
+export const { setUserId } = userModule.actions;

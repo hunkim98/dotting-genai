@@ -1,7 +1,18 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Head from "next/head";
-import { Button } from "@chakra-ui/react";
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
+} from "@chakra-ui/react";
 import RightBar from "@/components/RightBar";
 import Toolbar from "@/components/Toolbar";
 import Header from "@/components/Header";
@@ -34,16 +45,23 @@ import { setGeneratedImgUrls, setIsReceiving } from "@/lib/modules/genAi";
 import { DIFFUSION_URL } from "@/constants/urls";
 import { PostTrackStrokeBodyDto } from "@/dto/track/body/post.track.stroke.body.dto";
 import { getNeighboringPixels } from "@/utils/record";
+import { setUserId } from "@/lib/modules/user";
 
 const neighborMaxDegree = 2;
 
 export default function Home() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const ref = useRef<DottingRef>(null);
   const [gridStrokeWidth, setGridStrokeWidth] = useState<number>(1);
   const [gridStrokeColor, setGridStrokeColor] = useState<string>("#000000");
   const [isGridFixed, setIsGridFixed] = useState<boolean>(false);
   const [isGridVisible, setIsGridVisible] = useState<boolean>(true);
   const [isPanZoomable, setIsPanZoomable] = useState<boolean>(true);
+  const [userIdInput, setUserIdInput] = useState<string>("");
+
+  useEffect(() => {
+    onOpen();
+  }, [onOpen]);
 
   const dispatch = useAppDispatch();
   const {
@@ -221,7 +239,8 @@ export default function Home() {
         data,
       });
       const body: PostTrackStrokeBodyDto = {
-        userId: "dotting-service-" + userId,
+        // userId: "dotting-service-" + userId,
+        userId: userId,
         createdAt: new Date(),
         strokeTool,
         strokedPixels,
@@ -372,6 +391,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <main style={{ display: "flex", width: "100vw" }}>
         <div
           style={{
@@ -406,7 +426,7 @@ export default function Home() {
               })}
           />
 
-          {isRightBar ? (
+          {/* {isRightBar ? (
             <RightBar onSubmit={callImage} />
           ) : (
             <Button
@@ -420,7 +440,7 @@ export default function Home() {
             >
               Open Dotting Ai Assistant
             </Button>
-          )}
+          )} */}
           <Header downloadImage={downloadImage} isGridVisible={isGridVisible} />
           <Toolbar
             ref={ref}
@@ -437,6 +457,39 @@ export default function Home() {
           />
         </div>
       </main>
+      <Modal isOpen={isOpen} onClose={() => {}}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Input your user id</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              placeholder="User id"
+              value={userIdInput}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setUserIdInput(e.target.value);
+                }
+              }}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="teal"
+              mr={3}
+              onClick={() => {
+                if (userIdInput) {
+                  dispatch(setUserId(userIdInput));
+                  onClose();
+                }
+              }}
+            >
+              Submit
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
