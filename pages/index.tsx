@@ -60,7 +60,7 @@ export default function Home() {
   const [userIdInput, setUserIdInput] = useState<string>("");
 
   useEffect(() => {
-    if (!process.env.IS_TESTING) {
+    if (!process.env.NEXT_PUBLIC_IS_TESTING) {
       onOpen();
     }
   }, [onOpen]);
@@ -188,7 +188,7 @@ export default function Home() {
           strokeStartNeighboringPixels: neighboringPixels,
           createdAt: new Date(),
         };
-        if (!process.env.IS_TESTING) {
+        if (!process.env.NEXT_PUBLIC_IS_TESTING) {
           axios.post("/api/track/stroke", body).then((res) => {
             console.log(res.data);
           });
@@ -250,7 +250,7 @@ export default function Home() {
         strokedPixels,
         strokeStartNeighboringPixels: neighboringPixels,
       };
-      if (!process.env.IS_TESTING) {
+      if (!process.env.NEXT_PUBLIC_IS_TESTING) {
         axios.post("/api/track/stroke", body).then((res) => {
           console.log(res.data);
         });
