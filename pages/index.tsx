@@ -182,7 +182,7 @@ export default function Home() {
           data,
         });
         const body: PostTrackStrokeBodyDto = {
-          userId: userId,
+          userId: "with_ai-" + userId,
           strokedPixels: tempIndicators,
           strokeTool: "GENAI",
           strokeStartNeighboringPixels: neighboringPixels,
@@ -244,7 +244,7 @@ export default function Home() {
       });
       const body: PostTrackStrokeBodyDto = {
         // userId: "dotting-service-" + userId,
-        userId: userId,
+        userId: "with_ai-" + userId,
         createdAt: new Date(),
         strokeTool,
         strokedPixels,
