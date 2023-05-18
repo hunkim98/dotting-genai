@@ -10,7 +10,7 @@ export const UserInitialState: UserState = {
 };
 
 export const userModule = createSlice({
-  name: "user",
+  name: "test",
   initialState: UserInitialState,
   reducers: {
     setUserId: (state, action) => {
