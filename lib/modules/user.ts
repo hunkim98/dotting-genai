@@ -6,11 +6,11 @@ export type UserState = {
 };
 
 export const UserInitialState: UserState = {
-  userId: uuidv4(),
+  userId: "test",
 };
 
 export const userModule = createSlice({
-  name: "test",
+  name: "user",
   initialState: UserInitialState,
   reducers: {
     setUserId: (state, action) => {
