@@ -60,7 +60,9 @@ export default function Home() {
   const [userIdInput, setUserIdInput] = useState<string>("");
 
   useEffect(() => {
-    onOpen();
+    if (!process.env.IS_TESTING) {
+      onOpen();
+    }
   }, [onOpen]);
 
   const dispatch = useAppDispatch();
@@ -186,9 +188,11 @@ export default function Home() {
           strokeStartNeighboringPixels: neighboringPixels,
           createdAt: new Date(),
         };
-        axios.post("/api/track/stroke", body).then((res) => {
-          console.log(res.data);
-        });
+        if (!process.env.IS_TESTING) {
+          axios.post("/api/track/stroke", body).then((res) => {
+            console.log(res.data);
+          });
+        }
 
         setSelectedDottingData(null);
         setIndicatorPixels([]);
@@ -246,9 +250,11 @@ export default function Home() {
         strokedPixels,
         strokeStartNeighboringPixels: neighboringPixels,
       };
-      axios.post("/api/track/stroke", body).then((res) => {
-        console.log(res.data);
-      });
+      if (!process.env.IS_TESTING) {
+        axios.post("/api/track/stroke", body).then((res) => {
+          console.log(res.data);
+        });
+      }
     },
     [userId, data, hoveredPixel]
   );
