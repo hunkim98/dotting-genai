@@ -1,4 +1,4 @@
-const serverDestination = process.env.NEXT_PUBLIC_REAL_AI_URL + "/:path*";
+const pixelCharacterServer = process.env.PIXEL_CHARACTER_GEN + "/:path*";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,13 +7,9 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/genai/:path*",
-        destination: serverDestination, // Proxy to Backend
+        source: "/pixel_character/:path*",
+        destination: pixelCharacterServer, // Proxy to Backend
       },
-      // {
-      //   source: "/image/upload",
-      //   destination: "https://image.simpledimpleworld.com/upload", // Proxy to Backend
-      // },
     ];
   },
 };

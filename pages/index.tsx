@@ -156,21 +156,21 @@ export default function Home() {
           }
         );
         colorPixels(tempIndicators);
-        const neighboringPixels = getNeighboringPixels({
-          rowIndex,
-          columnIndex,
-          data,
-        });
-        const body: PostTrackStrokeBodyDto = {
-          userId: userId,
-          strokedPixels: tempIndicators,
-          strokeTool: "GENAI",
-          strokeStartNeighboringPixels: neighboringPixels,
-          createdAt: new Date(),
-        };
-        axios.post("/api/track/stroke", body).then((res) => {
-          console.log(res.data);
-        });
+        // const neighboringPixels = getNeighboringPixels({
+        //   rowIndex,
+        //   columnIndex,
+        //   data,
+        // });
+        // const body: PostTrackStrokeBodyDto = {
+        //   userId: userId,
+        //   strokedPixels: tempIndicators,
+        //   strokeTool: "GENAI",
+        //   strokeStartNeighboringPixels: neighboringPixels,
+        //   createdAt: new Date(),
+        // };
+        // axios.post("/api/track/stroke", body).then((res) => {
+        //   console.log(res.data);
+        // });
 
         setSelectedDottingData(null);
         setIndicatorPixels([]);
@@ -214,22 +214,22 @@ export default function Home() {
       if (hoveredPixel.current === null) {
         return;
       }
-      const { rowIndex, columnIndex } = hoveredPixel.current;
-      const neighboringPixels = getNeighboringPixels({
-        rowIndex,
-        columnIndex,
-        data,
-      });
-      const body: PostTrackStrokeBodyDto = {
-        userId: "dotting-service-" + userId,
-        createdAt: new Date(),
-        strokeTool,
-        strokedPixels,
-        strokeStartNeighboringPixels: neighboringPixels,
-      };
-      axios.post("/api/track/stroke", body).then((res) => {
-        console.log(res.data);
-      });
+      // const { rowIndex, columnIndex } = hoveredPixel.current;
+      // const neighboringPixels = getNeighboringPixels({
+      //   rowIndex,
+      //   columnIndex,
+      //   data,
+      // });
+      // const body: PostTrackStrokeBodyDto = {
+      //   userId: "dotting-service-" + userId,
+      //   createdAt: new Date(),
+      //   strokeTool,
+      //   strokedPixels,
+      //   strokeStartNeighboringPixels: neighboringPixels,
+      // };
+      // axios.post("/api/track/stroke", body).then((res) => {
+      //   console.log(res.data);
+      // });
     },
     [userId, data, hoveredPixel]
   );
@@ -352,15 +352,15 @@ export default function Home() {
         ])
       );
     } else if (step === 2) {
-      dispatch(
-        addMessages([
-          {
-            type: ChatType.TEXT,
-            From: From.AI,
-            content: "Please input your prompt.",
-          },
-        ])
-      );
+      // dispatch(
+      //   addMessages([
+      //     {
+      //       type: ChatType.TEXT,
+      //       From: From.AI,
+      //       content: "Please input your prompt.",
+      //     },
+      //   ])
+      // );
     }
   }, [step]);
 
@@ -391,19 +391,24 @@ export default function Home() {
             isGridVisible={isGridVisible}
             style={{ border: "none" }}
             height={"100vh"}
-            initData={Array(30)
-              .fill("")
-              .map((out, outIndex) => {
-                return Array(30)
+            initLayers={[
+              {
+                id: "layer1",
+                data: Array(30)
                   .fill("")
-                  .map((inner, innerIndex) => {
-                    return {
-                      color: "",
-                      rowIndex: outIndex,
-                      columnIndex: innerIndex,
-                    };
-                  });
-              })}
+                  .map((out, outIndex) => {
+                    return Array(30)
+                      .fill("")
+                      .map((inner, innerIndex) => {
+                        return {
+                          color: "",
+                          rowIndex: outIndex,
+                          columnIndex: innerIndex,
+                        };
+                      });
+                  }),
+              },
+            ]}
           />
 
           {isRightBar ? (
