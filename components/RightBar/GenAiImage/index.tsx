@@ -83,12 +83,13 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
         <Image
           src={previewImgUrl}
           // fill
-
+          draggable={false}
           alt={""}
           width={160}
           height={160}
           style={{
             cursor: "pointer",
+            userSelect: "none",
           }}
           onMouseEnter={() => {
             setIsHovered(true);
@@ -96,7 +97,7 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
           onMouseLeave={() => {
             setIsHovered(false);
           }}
-          onClick={() => {
+          onMouseDown={() => {
             if (dottingData.current && previewDimensions) {
               console.log(previewDimensions);
               setSelectedDottingData({
@@ -105,6 +106,9 @@ const GenAiImage: React.FC<Props> = ({ rawImageUrl, initPixelationDegree }) => {
                 height: previewDimensions.height,
               });
             }
+          }}
+          onDrag={(event) => {
+            event.preventDefault();
           }}
         />
       </Center>
