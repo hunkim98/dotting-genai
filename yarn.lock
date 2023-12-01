@@ -1728,10 +1728,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dotting@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/dotting/-/dotting-2.1.4.tgz#7b9cfae505fdc5fff5e4b2b69eb98de2737c6385"
-  integrity sha512-fDXZmWlD198/7rCeEuS4hSXin+F+8KvsuOdw/A4j302caJgNKRGm1kfJH+wY/yt+9Y2vpPjWBorwGEcwS0ppEw==
+dotting@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/dotting/-/dotting-2.1.5.tgz#5e99cd0310d8a9789a96dfb693e7035763c5876c"
+  integrity sha512-T08eH1LOIRbYL21we8LOA4ZFAyW56R8yXqgilQweFRXT5SKKwEzrn3OO9bzLAyx05d29+xirBevagXLVdLt08A==
 
 emoji-regex@^9.2.2:
   version "9.2.2"

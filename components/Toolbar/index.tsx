@@ -23,6 +23,7 @@ import {
   ArrowUpIcon,
   SettingsIcon,
   ArrowUpDownIcon,
+  ChevronUpIcon,
 } from "@chakra-ui/icons";
 import {
   Menu,
@@ -42,7 +43,20 @@ import {
   AlertDialogBody,
   AlertDialogFooter,
   useDisclosure,
+  Slider,
+  SliderTrack,
+  Box,
+  SliderFilledTrack,
+  SliderThumb,
+  PopoverContent,
+  PopoverTrigger,
+  Popover,
+  PopoverBody,
+  PopoverHeader,
+  PopoverArrow,
+  PopoverCloseButton,
 } from "@chakra-ui/react";
+import { brushPatterns } from "@/utils/brush/config";
 
 interface ToolbarProps {
   isGridFixed: boolean;
@@ -83,25 +97,33 @@ const Toolbar = forwardRef(function ToolBarInner(
   //@ts-ignore
   const { undo, redo, clear } = useDotting(ref);
 
-  useEffect(() => {
-    const keyboardUndoListener = (e: KeyboardEvent) => {
-      if (e.code === "KeyZ" && (e.ctrlKey || e.metaKey)) {
-        undo();
-      }
-    };
-    const keyboardRedoListener = (e: KeyboardEvent) => {
-      if (e.code === "KeyY" && (e.ctrlKey || e.metaKey)) {
-        redo();
-      }
-    };
-    document.addEventListener("keydown", keyboardUndoListener);
-    document.addEventListener("keydown", keyboardRedoListener);
-    return () => {
-      document.removeEventListener("keydown", keyboardUndoListener);
-      document.removeEventListener("keydown", keyboardRedoListener);
-    };
-  }, []);
-  const { changeBrushColor, changeBrushTool, brushTool, brushColor } =
+  const [brushSize, setBrushSize] = useState(3);
+
+  // useEffect(() => {
+  //   const keyboardUndoListener = (e: KeyboardEvent) => {
+  //     if (e.code === "KeyZ" && (e.ctrlKey || e.metaKey)) {
+  //       undo();
+  //     }
+  //   };
+  //   const keyboardRedoListener = (e: KeyboardEvent) => {
+  //     if (e.code === "KeyY" && (e.ctrlKey || e.metaKey)) {
+  //       redo();
+  //     }
+  //   };
+  //   document.addEventListener("keydown", keyboardUndoListener);
+  //   document.addEventListener("keydown", keyboardRedoListener);
+  //   return () => {
+  //     document.removeEventListener("keydown", keyboardUndoListener);
+  //     document.removeEventListener("keydown", keyboardRedoListener);
+  //   };
+  // }, []);
+  const {
+    changeBrushColor,
+    changeBrushTool,
+    brushTool,
+    brushColor,
+    changeBrushPattern,
+  } =
     //@ts-ignore
     useBrush(ref);
 
@@ -132,6 +154,11 @@ const Toolbar = forwardRef(function ToolBarInner(
     },
     []
   );
+
+  useEffect(() => {
+    const brushPattern = brushPatterns[brushSize - 1];
+    changeBrushPattern(brushPattern);
+  }, [brushSize, changeBrushPattern, (ref as any).current]);
 
   useEffect(() => {
     if (brushTool === BrushTool.DOT) {
@@ -217,6 +244,39 @@ const Toolbar = forwardRef(function ToolBarInner(
           >
             <Image src={dot} width={24} height={24} alt="dot" />
           </Button>
+        </Tooltip>
+        <Tooltip label="brush size" placement="top">
+          <Popover placement="top-start">
+            <PopoverTrigger>
+              <Button width="64px" borderRadius={0}>
+                {brushSize}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverHeader fontWeight="semibold">Brush Size</PopoverHeader>
+              <PopoverArrow />
+              <PopoverCloseButton />
+              <PopoverBody>
+                <Slider
+                  defaultValue={6}
+                  min={1}
+                  max={6}
+                  step={1}
+                  value={brushSize}
+                  // orientation="vertical"
+                  onChange={(val) => {
+                    setBrushSize(val);
+                  }}
+                >
+                  <SliderTrack bg="green.100">
+                    <Box position="relative" right={6} />
+                    <SliderFilledTrack bg="teal" />
+                  </SliderTrack>
+                  <SliderThumb boxSize={6} />
+                </Slider>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Tooltip>
         <Tooltip label="paint bucket" placement="top">
           <Button
