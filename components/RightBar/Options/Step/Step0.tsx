@@ -83,7 +83,7 @@ const Step0 = () => {
     dispatch(setIsOptionsVisible(false));
 
     if (imgRef && imgRef.current && imgRef.current.files) {
-      const maxSize = 5 * 1024 * 1024;
+      const maxSize = 6 * 128 * 128;
 
       if (imgRef.current.files[0].size >= maxSize) {
         alert(`Only images smaller than ${maxSize}(MB) can be registered.`);
@@ -91,10 +91,35 @@ const Step0 = () => {
       }
 
       const file = imgRef.current.files[0];
-      const imgUrl = URL.createObjectURL(file);
-      const tempImgUrls: Array<string> = [];
-      tempImgUrls.push(imgUrl);
-      dispatch(setUploadedImgUrls(tempImgUrls));
+      const formData = new FormData();
+      formData.append('file', file);
+      const data = (await axios.post("/pixelizer/pixelize", formData)).data;
+      const result = data.result;
+      const imageResults = result;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1000;
+      canvas.height = 1000;
+      const imageWidth = imageResults.length;
+      console.log(imageWidth);
+      const ctx = canvas.getContext("2d")!;
+      const images: Array<string> = [];
+      const generated = imageResults;
+      ctx.clearRect(0, 0, 1000, 1000);
+      for (let i = 0; i < imageWidth; i++) {
+        for (let j = 0; j < imageWidth; j++) {
+          ctx.fillStyle = `rgb(${generated[i][j][0]}, ${generated[i][j][1]}, ${generated[i][j][2]})`;
+          ctx.fillRect(
+            (j * 1000) / imageWidth,
+            (i * 1000) / imageWidth,
+            1000 / imageWidth,
+            1000 / imageWidth
+          );
+        }
+      }
+      const imgUrl = canvas.toDataURL();
+      images.push(imgUrl);
+      // add the Image object to the DOM
 
       try {
         dispatch(
@@ -104,7 +129,7 @@ const Step0 = () => {
               from: From.AI,
               content: `Your images have been generated. Please select the image you want to use.`,
             },
-            ...tempImgUrls.map((url) => {
+            ...images.map((url) => {
               return {
                 type: ChatType.GENAIIMAGE,
                 from: From.AI,
