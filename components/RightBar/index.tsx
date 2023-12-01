@@ -44,7 +44,7 @@ export const RightBar = ({ onSubmit }: RightBarProps) => {
 
         <Chats />
 
-        <Prompt onSubmit={onSubmit} />
+        {/* <Prompt onSubmit={onSubmit} /> */}
       </Flex>
     </Flex>
   );
