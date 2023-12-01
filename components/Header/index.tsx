@@ -16,7 +16,7 @@ import {
 import { DownloadIcon, HamburgerIcon } from "@chakra-ui/icons";
 
 interface HeaderProps {
-  downloadImage: (options?: ImageDownloadOptions | undefined) => void;
+  downloadImage: (options: ImageDownloadOptions) => void;
   isGridVisible: boolean;
 }
 
