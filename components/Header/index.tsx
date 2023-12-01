@@ -69,23 +69,31 @@ const Header = ({ downloadImage, isGridVisible }: HeaderProps) => {
             <HamburgerIcon width="24px" height="auto" color={"#969696"} />
           </MenuButton>
           <Portal>
-            <MenuList
-              w={12}
-              py="0"
-              mt="-1"
-              borderRadius={10}
-              onClick={() => downloadImage({ isGridVisible })}
-            >
+            <MenuList w={12} py="0" mt="-1" borderRadius={10}>
               <MenuItem
                 pl="6"
                 icon={<DownloadIcon />}
                 fontSize={14}
                 borderRadius={10}
                 bg="white.500"
+                onClick={() => downloadImage({ isGridVisible, type: "png" })}
                 _hover={{ bg: "gray.50" }}
               >
                 <Flex py="2" pl="4">
-                  Download image
+                  Download as image
+                </Flex>
+              </MenuItem>
+              <MenuItem
+                pl="6"
+                icon={<DownloadIcon />}
+                fontSize={14}
+                borderRadius={10}
+                bg="white.500"
+                onClick={() => downloadImage({ isGridVisible, type: "svg" })}
+                _hover={{ bg: "gray.50" }}
+              >
+                <Flex py="2" pl="4">
+                  Download as svg
                 </Flex>
               </MenuItem>
             </MenuList>
