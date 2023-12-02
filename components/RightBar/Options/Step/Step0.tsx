@@ -83,16 +83,18 @@ const Step0 = () => {
     dispatch(setIsOptionsVisible(false));
 
     if (imgRef && imgRef.current && imgRef.current.files) {
-      const maxSize = 6 * 128 * 128;
+      const maxSize = 5 * 1024 * 1024;
 
       if (imgRef.current.files[0].size >= maxSize) {
         alert(`Only images smaller than ${maxSize}(MB) can be registered.`);
+        dispatch(setIsReceiving(false));
+        dispatch(setIsOptionsVisible(true));
         return;
       }
 
       const file = imgRef.current.files[0];
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
       const data = (await axios.post("/pixelizer/pixelize", formData)).data;
       const result = data.result;
       const imageResults = result;
