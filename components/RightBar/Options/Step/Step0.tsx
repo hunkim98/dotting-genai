@@ -142,6 +142,9 @@ const Step0 = () => {
         );
       } catch (error) {
         console.error(error);
+        alert("Error occured while generating pixelized image!");
+        dispatch(setIsReceiving(false));
+        dispatch(setIsOptionsVisible(true));
       }
 
       // DESC: change step, loading=false, can select next option
