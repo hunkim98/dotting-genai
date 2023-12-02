@@ -21,7 +21,7 @@
     "@types/react-dom": "18.0.11",
     "@types/uuid": "^9.0.1",
     "axios": "^1.3.4",
-    "dotting": "^2.1.5",
+    "dotting": "^2.1.6",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "framer-motion": "^10.10.0",
